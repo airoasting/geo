@@ -145,7 +145,7 @@ function _renderChart(canvasId, brands, isDemo, originalBrands) {
       responsive: true,
       maintainAspectRatio: false,
       layout: {
-        padding: { right: 28, top: 56, left: 4, bottom: 4 }
+        padding: { right: 80, top: 56, left: 4, bottom: 4 }
       },
       plugins: {
         legend: {
@@ -157,10 +157,12 @@ function _renderChart(canvasId, brands, isDemo, originalBrands) {
           borderWidth: 1,
           titleColor: '#ffffff',
           bodyColor: '#cccccc',
+          titleFont: { size: 14, weight: '600' },
+          bodyFont: { size: 13 },
           padding: 12,
           callbacks: {
             label: function(ctx) {
-              const lines = [`${ctx.dataset.label}: ${ctx.raw}점`];
+              const lines = [` ${ctx.dataset.label}: ${ctx.raw}점`];
               if (!isDemo && originalBrands) {
                 const brand = originalBrands[ctx.datasetIndex];
                 const key = PILLAR_KEYS[ctx.dataIndex];
@@ -188,6 +190,7 @@ function _renderChart(canvasId, brands, isDemo, originalBrands) {
         x: {
           min: 0,
           max: 10,
+          afterFit(scale) { scale.paddingRight = 24; },
           ticks: {
             stepSize: 1,
             color: '#555555',
