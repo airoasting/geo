@@ -219,7 +219,7 @@
         </div>
 
         <!-- 하단 액션 바 -->
-        <div class="action-bar">
+        <div class="action-bar" style="border-top:none;margin-top:16px;">
           <div class="action-bar__left">
             <a href="diagnose.html" class="btn btn--secondary">← 새 진단</a>
             <a href="history.html" class="btn btn--secondary">📊 히스토리</a>
@@ -245,5 +245,36 @@
   </footer>
 
   <script type="module" src="js/result.js"></script>
+
+  <!-- 점수 셀 툴팁 -->
+  <div id="score-tooltip"></div>
+  <script>
+    (function() {
+      var tip = document.getElementById('score-tooltip');
+      document.addEventListener('mouseover', function(e) {
+        var cell = e.target.closest('.score-cell');
+        if (!cell) { tip.style.display = 'none'; return; }
+        var reason = cell.getAttribute('data-reason');
+        if (!reason) return;
+        tip.textContent = reason;
+        tip.style.display = 'block';
+      });
+      document.addEventListener('mousemove', function(e) {
+        if (tip.style.display === 'none') return;
+        var x = e.clientX + 12;
+        var y = e.clientY + 12;
+        if (x + 220 > window.innerWidth) x = e.clientX - 232;
+        if (y + tip.offsetHeight > window.innerHeight) y = e.clientY - tip.offsetHeight - 8;
+        if (y < 8) y = 8;
+        if (x < 8) x = 8;
+        tip.style.left = x + 'px';
+        tip.style.top = y + 'px';
+      });
+      document.addEventListener('mouseout', function(e) {
+        var cell = e.target.closest('.score-cell');
+        if (cell) tip.style.display = 'none';
+      });
+    })();
+  </script>
 </body>
 </html>

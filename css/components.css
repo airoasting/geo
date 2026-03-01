@@ -624,31 +624,23 @@
 .score-cell--mid { color: var(--yellow-warn); }
 .score-cell--low { color: var(--red-accent); }
 
-/* 툴팁 */
-.score-cell::after {
-  content: attr(data-reason);
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+/* 툴팁 - JS로 대체됨 */
+#score-tooltip {
+  position: fixed;
   background: #333;
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 400;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-radius: var(--radius-sm);
   white-space: normal;
-  width: 200px;
+  width: 220px;
   text-align: left;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-  z-index: 10;
-  border: 1px solid var(--border-card);
-}
-
-.score-cell:hover::after {
-  opacity: 1;
+  z-index: 9999;
+  border: 1px solid #555;
+  line-height: 1.5;
+  display: none;
 }
 
 /* ===== 히스토리 카드 ===== */
