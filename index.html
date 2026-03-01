@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GEO 7-Pillar 브랜드 평가</title>
+  <meta name="description" content="AI가 추천하는 브랜드가 되기 위한 7가지 평가 기준. Claude AI로 브랜드를 분석하세요.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="GEO 7-Pillar 브랜드 평가">
+  <meta property="og:description" content="AI가 추천하는 브랜드가 되기 위한 7가지 평가 기준">
+  <meta property="og:type" content="website">
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "GEO 7-Pillar 브랜드 평가",
+    "description": "AI가 추천하는 브랜드가 되기 위한 7가지 평가 기준"
+  }
+  </script>
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    /* ===== 메인 페이지 전용 스타일 ===== */
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* 히어로 섹션 */
+    .hero {
+      background: #1a1a1a;
+      position: relative;
+      overflow: hidden;
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 80%, rgba(180, 50, 30, 0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 20%, rgba(180, 50, 30, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .hero .container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero__tag {
+      display: inline-block;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--red-accent);
+      margin-bottom: 20px;
+    }
+
+    .hero__title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.1;
+      color: #ffffff;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .hero__sub {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.65);
+      max-width: 480px;
+      margin: 0 auto 32px;
+    }
+
+    .hero__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: var(--red-accent);
+      color: white;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all var(--transition-fast);
+    }
+
+    .hero__cta:hover {
+      background: var(--red-dark);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(231, 76, 60, 0.35);
+    }
+
+    /* 뉴스레터 배너 */
+    .newsletter-bar {
+      background: #2d2d2d;
+      border-top: 1px solid #3a3a3a;
+      border-bottom: 1px solid #3a3a3a;
+      padding: 18px 0;
+    }
+
+    .newsletter-bar .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .newsletter-bar__label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #cccccc;
+      white-space: nowrap;
+    }
+
+    .newsletter-bar__desc {
+      font-size: 0.8125rem;
+      color: #888888;
+    }
+
+    .newsletter-bar__btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 16px;
+      background: var(--green-cta);
+      color: white;
+      border-radius: 20px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .newsletter-bar__btn:hover {
+      background: var(--green-dark);
+      color: white;
+    }
+
+    /* 카드 섹션 */
+    .cards-section {
+      padding: 64px 0;
+      flex: 1;
+    }
+
+    .cards-section__header {
+      margin-bottom: 40px;
+    }
+
+    .cards-section__title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .cards-section__title span {
+      color: var(--red-accent);
+    }
+
+    .cards-section__sub {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+    }
+
+    /* Pillar 미리보기 */
+    .pillars-preview {
+      padding: 64px 0;
+      background: #f5f5f5;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .pillars-preview__title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .pillar-chip {
+      position: relative;
+      background: #ffffff;
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: 16px 10px;
+      text-align: center;
+      transition: all var(--transition-base);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      cursor: default;
+    }
+
+    .pillar-chip:hover {
+      border-color: var(--red-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(231,76,60,0.12);
+    }
+
+    .pillar-chip__num {
+      font-size: 1.25rem;
+      margin-bottom: 6px;
+      color: var(--red-accent);
+      font-weight: 700;
+    }
+
+    .pillar-chip__name {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    /* 말풍선 툴팁 */
+    .pillar-tooltip {
+      position: absolute;
+      bottom: calc(100% + 14px);
+      left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      width: 240px;
+      background: #ffffff;
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.13);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+      z-index: 200;
+      text-align: left;
+    }
+
+    /* 첫 번째 칩: 툴팁 왼쪽 정렬 */
+    .pillar-chip:first-child .pillar-tooltip {
+      left: 0;
+      transform: translateX(0) translateY(6px);
+    }
+    .pillar-chip:first-child:hover .pillar-tooltip {
+      transform: translateX(0) translateY(0);
+    }
+    .pillar-chip:first-child .pillar-tooltip::before,
+    .pillar-chip:first-child .pillar-tooltip::after {
+      left: 20px;
+    }
+
+    /* 마지막 칩: 툴팁 오른쪽 정렬 */
+    .pillar-chip:last-child .pillar-tooltip {
+      left: auto;
+      right: 0;
+      transform: translateX(0) translateY(6px);
+    }
+    .pillar-chip:last-child:hover .pillar-tooltip {
+      transform: translateX(0) translateY(0);
+    }
+    .pillar-chip:last-child .pillar-tooltip::before,
+    .pillar-chip:last-child .pillar-tooltip::after {
+      left: auto;
+      right: 20px;
+    }
+
+    /* 아래 꼬리 (border) */
+    .pillar-tooltip::before {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 9px solid transparent;
+      border-right: 9px solid transparent;
+      border-top: 9px solid var(--border-card);
+    }
+
+    /* 아래 꼬리 (fill) */
+    .pillar-tooltip::after {
+      content: '';
+      position: absolute;
+      top: calc(100% - 1px);
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid #ffffff;
+    }
+
+    .pillar-chip:hover .pillar-tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+
+    .pillar-tooltip__title {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--red-accent);
+      margin-bottom: 6px;
+    }
+
+    .pillar-tooltip__q {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+    }
+
+    .pillar-tooltip__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .pillar-tooltip__list li {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      padding-left: 12px;
+      position: relative;
+      line-height: 1.4;
+    }
+
+    .pillar-tooltip__list li::before {
+      content: '·';
+      position: absolute;
+      left: 3px;
+      color: var(--red-accent);
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .hero__title { font-size: 2.25rem; }
+      .pillars-grid { grid-template-columns: repeat(4, 1fr); }
+      .newsletter-bar__desc { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .pillars-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 히어로 섹션 -->
+  <section class="hero">
+    <div class="container">
+      <p class="hero__tag">AI Roasting</p>
+      <h1 class="hero__title">내 브랜드,<br>AI가 추천해줄까?</h1>
+      <p class="hero__sub">브랜드를 입력하면 AI가 7가지 기준으로 평가합니다</p>
+      <a href="diagnose.html" class="hero__cta">
+        🔍 무료로 진단하기 →
+      </a>
+    </div>
+  </section>
+
+  <!-- 뉴스레터 배너 -->
+  <div class="newsletter-bar">
+    <div class="container">
+      <span class="newsletter-bar__label">🔥 AI Roasting 뉴스레터</span>
+      <span class="newsletter-bar__desc">주간 AI 소식</span>
+      <a href="https://www.linkedin.com/newsletters/ai-%EB%A1%9C%EC%8A%A4%ED%8C%85-7321517076899127296/" class="newsletter-bar__btn" target="_blank" rel="noopener noreferrer">구독하기 →</a>
+    </div>
+  </div>
+
+  <!-- 메인 카드 섹션 -->
+  <section class="cards-section">
+    <div class="container">
+      <div class="cards-section__header">
+        <h2 class="cards-section__title">무엇을 하시겠어요?</h2>
+        <p class="cards-section__sub">프레임워크를 이해하고, 브랜드를 진단하고, 결과를 관리하세요</p>
+      </div>
+
+      <div class="three-card-grid">
+        <a href="framework.html" class="nav-card">
+          <span class="nav-card__icon">📖</span>
+          <span class="nav-card__title">AI는 브랜드를 어떻게 평가할까요?</span>
+          <span class="nav-card__desc">AI가 브랜드를 평가하는 7가지 기준이 무엇인지 알아보세요</span>
+        </a>
+
+        <a href="diagnose.html" class="nav-card">
+          <span class="nav-card__icon">🔍</span>
+          <span class="nav-card__title">브랜드 진단하기</span>
+          <span class="nav-card__desc">3개 브랜드를 동시에 분석하고 AI 추천 가능성을 점수로 확인하세요</span>
+        </a>
+
+        <a href="history.html" class="nav-card">
+          <span class="nav-card__icon">📊</span>
+          <span class="nav-card__title">진단 히스토리</span>
+          <span class="nav-card__desc">이전 진단 결과를 확인하고 브랜드 변화를 추적하세요</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7-Pillar 미리보기 -->
+  <div class="pillars-preview">
+    <div class="container">
+      <h3 class="pillars-preview__title">7가지 평가 기준</h3>
+      <div class="pillars-grid">
+        <div class="pillar-chip">
+          <div class="pillar-chip__num">①</div>
+          <div class="pillar-chip__name">수집<br>접근성</div>
+          <div class="pillar-tooltip">
+            <div class="pillar-tooltip__title">① 수집 접근성</div>
+            <p class="pillar-tooltip__q">AI 크롤러가 이 브랜드의 핵심 정보에 자유롭게 접근할 수 있는가?</p>
+            <ul class="pillar-tooltip__list">
+              <li>robots.txt가 AI 크롤러를 허용하는가</li>
+              <li>구조화 데이터(JSON-LD)가 적용되어 있는가</li>
+              <li>Wikipedia 등 주요 참조 문서가 존재하는가</li>
+              <li>공식 SNS 계정이 활성화되어 있는가</li>
+            </ul>
+          </div>
+        </div>
+        <div class="pillar-chip">
+          <div class="pillar-chip__num">②</div>
+          <div class="pillar-chip__name">출처<br>권위도</div>
+          <div class="pillar-tooltip">
+            <div class="pillar-tooltip__title">② 출처 권위도</div>
+            <p class="pillar-tooltip__q">AI가 참조하는 권위 있는 출처에서 이 브랜드를 언급하는가?</p>
+            <ul class="pillar-tooltip__list">
+              <li>주요 언론사의 브랜드 기사 수</li>
+              <li>전문 연구기관·학술지에서의 언급</li>
+              <li>정부기관·공식 단체의 인정 및 수상</li>
+              <li>전문가 리뷰 및 언급 품질</li>
+            </ul>
+          </div>
+        </div>
+        <div class="pillar-chip">
+          <div class="pillar-chip__num">③</div>
+          <div class="pillar-chip__name">정보<br>충실도</div>
+          <div class="pillar-tooltip">
+            <div class="pillar-tooltip__title">③ 정보 충실도</div>
+            <p class="pillar-tooltip__q">AI가 브랜드의 특성·제품·역사·가치관을 설명할 수 있을 만큼 정보가 충분한가?</p>
+            <ul class="pillar-tooltip__list">
+              <li>브랜드 스토리·창업 배경·가치관 설명</li>
+              <li>제품/서비스 차별점의 구체적 정보</li>
+              <li>고객 리뷰·사용 후기의 양과 질</li>
+              <li>공식 웹사이트 콘텐츠의 완성도</li>
+            </ul>
+          </div>
+        </div>
+        <div class="pillar-chip">
+          <div class="pillar-chip__num">④</div>
+          <div class="pillar-chip__name">정보<br>최신성</div>
+          <div class="pillar-tooltip">
+            <div class="pillar-tooltip__title">④ 정보 최신성</div>
+            <p class="pillar-tooltip__q">최근 6개월~1년 내 브랜드 신규 정보가 생성되고 있는가?</p>
+            <ul class="pillar-tooltip__list">
+              <li>최근 언론 보도·뉴스 기사 빈도</li>
+              <li>SNS·블로그 콘텐츠 업데이트 주기</li>
+              <li>신제품 출시·이벤트 등 최근 활동</li>
+              <li>웹사이트 최종 업데이트 일자</li>
+            </ul>
+          </div>
+        </div>
+        <div class="pillar-chip">
+          <div class="pillar-chip__num">⑤</div>
+          <div class="pillar-chip__name">서사<br>일관성</div>
+          <div class="pillar-tooltip">
+            <div class="pillar-tooltip__title">⑤ 서사 일관성</div>
+            <p class="pillar-tooltip__q">웹사이트·SNS·언론·리뷰 등 채널 전반에서 브랜드 메시지가 통일되어 있는가?</p>
+            <ul class="pillar-tooltip__list">
+              <li>공식 채널 전반의 톤앤매너 일관성</li>
+              <li>외부 리뷰와 공식 메시지의 정합성</li>
+              <li>시간에 따른 포지셔닝 일관성</li>
+              <li>다국어 채널의 메시지 통일성</li>
+            </ul>
+          </div>
+        </div>
+        <div class="pillar-chip">
+          <div class="pillar-chip__num">⑥</div>
+          <div class="pillar-chip__name">경쟁<br>차별성</div>
+          <div class="pillar-tooltip">
+            <div class="pillar-tooltip__title">⑥ 경쟁 차별성</div>
+            <p class="pillar-tooltip__q">동일 카테고리에서 AI가 이 브랜드를 경쟁사 대신 추천해야 할 이유가 있는가?</p>
+            <ul class="pillar-tooltip__list">
+              <li>카테고리 내 독보적 포지셔닝</li>
+              <li>경쟁사와 구분되는 USP</li>
+              <li>수상·인증·특허 등 객관적 차별화</li>
+              <li>특정 타겟 고객에 대한 전문성</li>
+            </ul>
+          </div>
+        </div>
+        <div class="pillar-chip">
+          <div class="pillar-chip__num">⑦</div>
+          <div class="pillar-chip__name">브랜드<br>안전성</div>
+          <div class="pillar-tooltip">
+            <div class="pillar-tooltip__title">⑦ 브랜드 안전성</div>
+            <p class="pillar-tooltip__q">AI가 이 브랜드를 추천했을 때 사용자에게 해를 끼칠 리스크가 없는가?</p>
+            <ul class="pillar-tooltip__list">
+              <li>최근 1년 내 논란·스캔들·불매운동</li>
+              <li>법적 분쟁·소송·규제 위반 사례</li>
+              <li>식품/의약품 등 안전 관련 이슈</li>
+              <li>ESG 리스크 여부</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 푸터 -->
+  <footer class="site-footer">
+    <div class="container">
+      <span class="site-footer__brand">AI ROASTING</span>
+      <span class="site-footer__copy">Generative Engine Optimization</span>
+    </div>
+  </footer>
+
+</body>
+</html>

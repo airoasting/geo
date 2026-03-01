@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# AI 크롤러 명시적 허용
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+Sitemap: https://YOUR_GITHUB_PAGES_URL/sitemap.xml

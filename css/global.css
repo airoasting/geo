@@ -1,0 +1,181 @@
+/* ===== CSS 변수 (Design Tokens) ===== */
+:root {
+  /* 배경 */
+  --bg-primary: #ffffff;
+  --bg-secondary: #fff5f5;
+  --bg-card: #f8f8f8;
+  --bg-card-hover: #eeeeee;
+  --bg-input: #f5f5f5;
+  --bg-header-gradient: linear-gradient(135deg, #ffffff 0%, #fff0f0 100%);
+
+  /* 텍스트 */
+  --text-primary: #111111;
+  --text-secondary: #444444;
+  --text-muted: #666666;
+  --text-dim: #999999;
+
+  /* 브랜드 색상 */
+  --red-accent: #e74c3c;
+  --red-dark: #c0392b;
+  --green-cta: #2ecc71;
+  --green-dark: #27ae60;
+  --blue-info: #3498db;
+  --yellow-warn: #f39c12;
+
+  /* 브랜드별 차트 색상 */
+  --brand-a: #e74c3c;
+  --brand-b: #3498db;
+  --brand-c: #2ecc71;
+
+  /* 등급 색상 */
+  --grade-s: #b8860b;
+  --grade-a: #e74c3c;
+  --grade-b: #3498db;
+  --grade-c: #f39c12;
+  --grade-d: #999999;
+
+  /* 보더 */
+  --border-subtle: #e5e5e5;
+  --border-card: #e0e0e0;
+  --border-input: #d0d0d0;
+  --border-focus: #e74c3c;
+
+  /* 간격 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 40px;
+  --spacing-xxl: 64px;
+
+  /* 타이포 */
+  --font-base: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', Consolas, monospace;
+
+  /* 반경 */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 100px;
+
+  /* 그림자 */
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.15);
+  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.25);
+
+  /* 트랜지션 */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+}
+
+/* ===== 리셋 ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== 기본 타이포 ===== */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-base);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  word-break: keep-all;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+
+p { color: var(--text-secondary); }
+
+a {
+  color: var(--red-accent);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--red-dark);
+}
+
+ul, ol {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  font-family: var(--font-base);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, select, textarea {
+  font-family: var(--font-base);
+}
+
+/* ===== 유틸리티 ===== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.text-muted { color: var(--text-muted); }
+.text-accent { color: var(--red-accent); }
+.text-green { color: var(--green-cta); }
+.text-blue { color: var(--blue-info); }
+
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+.mt-xl { margin-top: var(--spacing-xl); }
+
+/* ===== 로딩 스피너 ===== */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--transition-slow) both;
+}

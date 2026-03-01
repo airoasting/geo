@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI는 브랜드를 어떻게 평가할까요?</title>
+  <meta name="description" content="AI가 브랜드를 평가하는 7가지 기준을 알아보세요. GEO 7-Pillar 프레임워크의 상세 설명입니다.">
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+    /* ===== Framework 페이지 전용 ===== */
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* 4-Layer 다이어그램 */
+    .layer-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 40px;
+    }
+
+    .layer {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 20px;
+      border-radius: 10px;
+      border-left: 4px solid transparent;
+    }
+
+    .layer--gate {
+      background: rgba(231, 76, 60, 0.1);
+      border-left-color: var(--red-accent);
+    }
+
+    .layer--core {
+      background: rgba(52, 152, 219, 0.08);
+      border-left-color: var(--blue-info);
+    }
+
+    .layer--value {
+      background: rgba(46, 204, 113, 0.08);
+      border-left-color: var(--green-cta);
+    }
+
+    .layer--risk {
+      background: rgba(243, 156, 18, 0.1);
+      border-left-color: var(--yellow-warn);
+    }
+
+    .layer__label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      min-width: 100px;
+      text-transform: uppercase;
+    }
+
+    .layer__pillars {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .layer__pillar-tag {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+
+    .layer--gate .layer__pillar-tag {
+      background: rgba(231, 76, 60, 0.15);
+      color: var(--red-accent);
+    }
+
+    .layer--core .layer__pillar-tag {
+      background: rgba(52, 152, 219, 0.12);
+      color: var(--blue-info);
+    }
+
+    .layer--value .layer__pillar-tag {
+      background: rgba(46, 204, 113, 0.12);
+      color: var(--green-cta);
+    }
+
+    .layer--risk .layer__pillar-tag {
+      background: rgba(243, 156, 18, 0.15);
+      color: var(--yellow-warn);
+    }
+
+    .layer__desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      width: 320px;
+      flex-shrink: 0;
+      text-align: left;
+      border-left: 1px solid rgba(0,0,0,0.08);
+      padding-left: 16px;
+    }
+
+    .layer--gate .layer__desc  { color: rgba(190, 60, 40, 0.75); }
+    .layer--core .layer__desc  { color: rgba(52, 120, 180, 0.75); }
+    .layer--value .layer__desc { color: rgba(40, 160, 90, 0.75); }
+    .layer--risk .layer__desc  { color: rgba(200, 120, 0, 0.75); }
+
+    @media (max-width: 700px) {
+      .layer__desc { display: none; }
+    }
+
+    .layer__veto-badge {
+      position: relative;
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 3px 9px;
+      background: rgba(231, 76, 60, 0.18);
+      color: var(--red-accent);
+      border: 1px solid rgba(231, 76, 60, 0.7);
+      border-radius: 6px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-left: 10px;
+    }
+
+    /* 말풍선 꼬리 (border) */
+    .layer__veto-badge::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-right: 8px solid rgba(231, 76, 60, 0.4);
+    }
+
+    /* 말풍선 꼬리 (fill) */
+    .layer__veto-badge::after {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-right: 7px solid rgba(231, 76, 60, 0.12);
+    }
+
+    /* 점수 시스템 테이블 */
+    .grade-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    .grade-table th, .grade-table td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.875rem;
+    }
+
+    .grade-table th {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .grade-table td:first-child { font-weight: 700; font-size: 1.125rem; }
+
+    /* ARS Veto 시각화 */
+    .veto-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .veto-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .veto-card--hard { border-top: 3px solid var(--red-accent); background: rgba(231, 76, 60, 0.05); }
+    .veto-card--soft { border-top: 3px solid var(--yellow-warn); }
+    .veto-card--normal { border-top: 3px solid var(--green-cta); }
+
+    .veto-card__max {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .veto-card--hard .veto-card__max { color: var(--red-accent); }
+    .veto-card--soft .veto-card__max { color: var(--yellow-warn); }
+    .veto-card--normal .veto-card__max { color: var(--green-cta); }
+
+    .veto-card__label {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .veto-card__cond {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* 데모 차트 */
+    .chart-wrapper {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .chart-wrapper canvas {
+      max-height: 360px;
+    }
+
+    /* 아코디언 Veto 인디케이터 */
+    .veto-indicator {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      background: rgba(231, 76, 60, 0.15);
+      color: var(--red-accent);
+      border: 1px solid rgba(231, 76, 60, 0.5);
+      border-radius: 4px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+      margin-left: 10px;
+      vertical-align: middle;
+      line-height: 1;
+      position: relative;
+      top: -2px;
+    }
+
+    /* Pillar 상세 내용 */
+    .pillar-detail {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .pillar-detail__section { }
+
+    .pillar-detail__heading {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .pillar-detail__text {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .pillar-detail__list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .pillar-detail__list li {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      display: flex;
+      gap: 6px;
+    }
+
+    .pillar-detail__list li::before {
+      content: '·';
+      color: var(--red-accent);
+    }
+
+    .pillar-core-question {
+      padding: 12px 14px;
+      background: rgba(231, 76, 60, 0.07);
+      border-left: 3px solid var(--red-accent);
+      border-radius: 0 6px 6px 0;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    /* 섹션 타이틀 좌측 강조 */
+    .section__title {
+      border-bottom: none;
+      border-left: 3px solid var(--red-accent);
+      padding-left: 12px;
+      padding-bottom: 0;
+    }
+
+    @media (max-width: 700px) {
+      .pillar-detail { grid-template-columns: 1fr; }
+      .veto-grid { grid-template-columns: 1fr; }
+      .demo-score-cards { grid-template-columns: 1fr; }
+    }
+
+    /* 결과지 샘플 카드 */
+    .demo-score-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .demo-score-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+    }
+
+    .demo-score-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .demo-score-card__dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .demo-score-card__name {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .demo-score-card__geo {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .demo-score-card__geo-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .demo-score-card__divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin-bottom: 12px;
+    }
+
+    .demo-score-card__ars-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .demo-score-card__ars {
+      font-size: 1.75rem;
+      font-weight: 800;
+    }
+
+    .demo-score-card__ars-label {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .demo-score-card__penalty {
+      font-size: 0.75rem;
+      color: var(--red-accent);
+      margin-top: 8px;
+      font-weight: 700;
+      padding: 5px 8px;
+      background: rgba(231, 76, 60, 0.08);
+      border: 1px solid rgba(231, 76, 60, 0.25);
+      border-radius: 6px;
+    }
+
+    /* Pillar 상세 테이블 */
+    .demo-pillar-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .demo-pillar-table th,
+    .demo-pillar-table td {
+      padding: 10px 16px;
+      border: 1px solid var(--border-subtle);
+      text-align: center;
+    }
+
+    .demo-pillar-table th {
+      background: var(--bg-card);
+      font-weight: 700;
+      font-size: 0.8125rem;
+    }
+
+    .demo-pillar-table td:first-child {
+      text-align: left;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .demo-pillar-table tbody tr:hover {
+      background: var(--bg-card);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 페이지 헤더 -->
+  <header class="page-header">
+    <div class="container">
+      <a href="index.html" class="page-header__back">← 목록으로</a>
+      <h1 class="page-header__title">AI는 브랜드를 어떻게 평가할까요?</h1>
+      <p class="page-header__sub">AI 추천 가능성을 결정하는 7가지 핵심 기준</p>
+      <span class="page-header__badge">v1.0 GEO-7 Pillar</span>
+    </div>
+  </header>
+
+  <!-- 메인 콘텐츠 -->
+  <main class="page-main" style="flex:1;">
+    <div class="container">
+
+      <!-- 1. 4-Layer 구조 -->
+      <section class="section">
+        <h2 class="section__title">7대 평가 기준</h2>
+        <div class="layer-diagram">
+          <div class="layer layer--gate">
+            <span class="layer__label">Gate Layer</span>
+            <div class="layer__pillars">
+              <span class="layer__pillar-tag">① 수집 접근성</span>
+              <span class="layer__veto-badge">최소 충족 조건</span>
+            </div>
+            <span class="layer__desc">AI가 브랜드 정보를 읽을 수 있는지 확인하는 첫 번째 관문. 통과 못 하면 평가 자체가 불가합니다.</span>
+          </div>
+          <div class="layer layer--core">
+            <span class="layer__label">Core Layer</span>
+            <div class="layer__pillars">
+              <span class="layer__pillar-tag">② 출처 권위도</span>
+              <span class="layer__pillar-tag">③ 정보 충실도</span>
+              <span class="layer__pillar-tag">④ 정보 최신성</span>
+              <span class="layer__pillar-tag">⑤ 서사 일관성</span>
+            </div>
+            <span class="layer__desc">AI 추천 점수의 핵심. 얼마나 신뢰할 수 있고, 풍부하고, 최신인 정보를 갖추고 있는지 평가합니다.</span>
+          </div>
+          <div class="layer layer--value">
+            <span class="layer__label">Value Layer</span>
+            <div class="layer__pillars">
+              <span class="layer__pillar-tag">⑥ 경쟁 차별성</span>
+            </div>
+            <span class="layer__desc">경쟁 브랜드 대신 이 브랜드를 추천해야 할 이유가 있는지 평가합니다.</span>
+          </div>
+          <div class="layer layer--risk">
+            <span class="layer__label">Risk Layer</span>
+            <div class="layer__pillars">
+              <span class="layer__pillar-tag">⑦ 브랜드 안전성</span>
+              <span class="layer__veto-badge">최소 충족 조건</span>
+            </div>
+            <span class="layer__desc">AI가 이 브랜드를 추천했을 때 사용자에게 피해가 생길 위험이 없는지 확인합니다.</span>
+          </div>
+        </div>
+        <p class="text-muted" style="font-size:0.875rem;">
+          ① 수집 접근성과 ⑦ 브랜드 안전성은 <strong style="color:var(--red-accent)">최소 충족 조건</strong> 기준입니다.
+          두 기준 중 하나라도 점수가 낮으면 AI 추천 가능성이 급격히 제한됩니다.
+        </p>
+      </section>
+
+      <!-- 2. 7-Pillar 아코디언 -->
+      <section class="section">
+        <h2 class="section__title">상세 평가 기준</h2>
+        <div class="accordion" id="pillar-accordion">
+
+          <!-- P1 수집 접근성 -->
+          <div class="accordion-item" id="pillar-0">
+            <div class="accordion-header" onclick="toggleAccordion(0)">
+              <div class="accordion-header__left">
+                <span class="accordion-header__number">①</span>
+                <div class="accordion-header__info">
+                  <div class="accordion-header__name">수집 접근성 <span class="veto-indicator">최소 충족 조건</span></div>
+                  <div class="accordion-header__tagline">AI가 브랜드 정보를 수집할 수 있는가?</div>
+                </div>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body" id="body-0">
+              <div class="accordion-body__inner">
+                <div class="pillar-core-question">"AI 크롤러가 이 브랜드의 핵심 정보에 자유롭게 접근할 수 있는가?"</div>
+                <div class="pillar-detail">
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">평가 포인트</div>
+                    <ul class="pillar-detail__list">
+                      <li>공식 웹사이트의 robots.txt가 AI 크롤러를 허용하는가</li>
+                      <li>구조화 데이터(JSON-LD, Schema.org)가 적용되어 있는가</li>
+                      <li>Wikipedia, 나무위키 등 주요 참조 문서가 존재하는가</li>
+                      <li>공식 SNS 계정이 활성화되어 있고 정보가 풍부한가</li>
+                    </ul>
+                  </div>
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">비유</div>
+                    <p class="pillar-detail__text">도서관의 서가에 책이 올바르게 정리되어 있어야 사서(AI)가 찾아줄 수 있듯, 브랜드 정보가 AI가 읽을 수 있는 형태로 공개되어 있어야 합니다.</p>
+                    <div class="pillar-detail__heading" style="margin-top:12px;">경계</div>
+                    <p class="pillar-detail__text">단순 검색 노출 여부가 아닌, AI 학습 및 실시간 검색 도구가 구조화된 정보에 접근 가능한지를 평가합니다.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- P2 출처 권위도 -->
+          <div class="accordion-item" id="pillar-1">
+            <div class="accordion-header" onclick="toggleAccordion(1)">
+              <div class="accordion-header__left">
+                <span class="accordion-header__number">②</span>
+                <div class="accordion-header__info">
+                  <div class="accordion-header__name">출처 권위도</div>
+                  <div class="accordion-header__tagline">신뢰할 수 있는 외부 출처가 브랜드를 언급하는가?</div>
+                </div>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body" id="body-1">
+              <div class="accordion-body__inner">
+                <div class="pillar-core-question">"AI가 학습하거나 참조하는 권위 있는 출처에서 이 브랜드를 언급하는가?"</div>
+                <div class="pillar-detail">
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">평가 포인트</div>
+                    <ul class="pillar-detail__list">
+                      <li>주요 언론사(중앙일보, 조선일보, 한겨레 등)의 브랜드 기사 수</li>
+                      <li>전문 연구기관, 학술지에서의 언급 여부</li>
+                      <li>정부기관, 공식 단체의 인정 또는 수상 내역</li>
+                      <li>인플루언서, 전문가의 리뷰 및 언급 품질</li>
+                    </ul>
+                  </div>
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">비유</div>
+                    <p class="pillar-detail__text">법정에서 증인의 신뢰성이 중요하듯, AI는 누가 브랜드에 대해 말하는지를 기반으로 신뢰도를 판단합니다.</p>
+                    <div class="pillar-detail__heading" style="margin-top:12px;">경계</div>
+                    <p class="pillar-detail__text">단순 언급 수가 아닌 출처의 권위성(도메인 신뢰도, 전문성)이 핵심 평가 기준입니다.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- P3 정보 충실도 -->
+          <div class="accordion-item" id="pillar-2">
+            <div class="accordion-header" onclick="toggleAccordion(2)">
+              <div class="accordion-header__left">
+                <span class="accordion-header__number">③</span>
+                <div class="accordion-header__info">
+                  <div class="accordion-header__name">정보 충실도</div>
+                  <div class="accordion-header__tagline">브랜드에 대한 충분한 깊이의 정보가 존재하는가?</div>
+                </div>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body" id="body-2">
+              <div class="accordion-body__inner">
+                <div class="pillar-core-question">"AI가 브랜드의 핵심 특성, 제품, 역사, 가치관을 설명할 수 있을 만큼 충분한 정보가 있는가?"</div>
+                <div class="pillar-detail">
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">평가 포인트</div>
+                    <ul class="pillar-detail__list">
+                      <li>브랜드 스토리, 창업 배경, 가치관에 대한 상세 설명</li>
+                      <li>제품/서비스의 차별점과 특징에 대한 구체적 정보</li>
+                      <li>고객 리뷰, 사용 후기의 양과 질</li>
+                      <li>공식 웹사이트 콘텐츠의 깊이와 완성도</li>
+                    </ul>
+                  </div>
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">비유</div>
+                    <p class="pillar-detail__text">AI는 충분한 정보가 있어야 질문에 자신 있게 답할 수 있습니다. 정보가 부족하면 추측하거나 다른 브랜드를 추천하게 됩니다.</p>
+                    <div class="pillar-detail__heading" style="margin-top:12px;">경계</div>
+                    <p class="pillar-detail__text">정보의 양보다 관련성과 구조화 정도가 더 중요합니다. 동일한 내용의 반복은 효과가 없습니다.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- P4 정보 최신성 -->
+          <div class="accordion-item" id="pillar-3">
+            <div class="accordion-header" onclick="toggleAccordion(3)">
+              <div class="accordion-header__left">
+                <span class="accordion-header__number">④</span>
+                <div class="accordion-header__info">
+                  <div class="accordion-header__name">정보 최신성</div>
+                  <div class="accordion-header__tagline">브랜드 정보가 최근에 업데이트되고 있는가?</div>
+                </div>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body" id="body-3">
+              <div class="accordion-body__inner">
+                <div class="pillar-core-question">"최근 6개월~1년 내에 브랜드에 대한 신규 정보가 생성되고 있는가?"</div>
+                <div class="pillar-detail">
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">평가 포인트</div>
+                    <ul class="pillar-detail__list">
+                      <li>최근 언론 보도 및 뉴스 기사의 빈도</li>
+                      <li>공식 SNS, 블로그의 콘텐츠 업데이트 주기</li>
+                      <li>신제품 출시, 이벤트, 협업 등 최근 활동</li>
+                      <li>웹사이트 최종 업데이트 일자</li>
+                    </ul>
+                  </div>
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">비유</div>
+                    <p class="pillar-detail__text">AI는 최신 정보를 선호합니다. 오래된 정보만 있는 브랜드는 "이미 문을 닫았을 수도 있다"고 판단할 수 있습니다.</p>
+                    <div class="pillar-detail__heading" style="margin-top:12px;">경계</div>
+                    <p class="pillar-detail__text">잦은 업데이트가 중요하지만, 일관성 없는 빈번한 변경은 오히려 혼란을 줄 수 있습니다.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- P5 서사 일관성 -->
+          <div class="accordion-item" id="pillar-4">
+            <div class="accordion-header" onclick="toggleAccordion(4)">
+              <div class="accordion-header__left">
+                <span class="accordion-header__number">⑤</span>
+                <div class="accordion-header__info">
+                  <div class="accordion-header__name">서사 일관성</div>
+                  <div class="accordion-header__tagline">브랜드 메시지가 채널 전반에 걸쳐 일관적인가?</div>
+                </div>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body" id="body-4">
+              <div class="accordion-body__inner">
+                <div class="pillar-core-question">"웹사이트, SNS, 언론보도, 리뷰 등 다양한 채널에서 브랜드 이미지와 메시지가 통일되어 있는가?"</div>
+                <div class="pillar-detail">
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">평가 포인트</div>
+                    <ul class="pillar-detail__list">
+                      <li>공식 채널 전반의 브랜드 톤앤매너 일관성</li>
+                      <li>외부 리뷰와 공식 메시지의 정합성</li>
+                      <li>시간에 따른 브랜드 포지셔닝의 일관성</li>
+                      <li>다국어 채널이 있는 경우 메시지 통일성</li>
+                    </ul>
+                  </div>
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">비유</div>
+                    <p class="pillar-detail__text">증인이 심문마다 다른 말을 하면 신뢰를 잃듯, 브랜드 메시지가 채널마다 다르면 AI가 혼란을 느끼고 추천을 꺼립니다.</p>
+                    <div class="pillar-detail__heading" style="margin-top:12px;">경계</div>
+                    <p class="pillar-detail__text">완벽한 동일성이 아닌 핵심 메시지와 브랜드 가치의 일관성이 중요합니다.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- P6 경쟁 차별성 -->
+          <div class="accordion-item" id="pillar-5">
+            <div class="accordion-header" onclick="toggleAccordion(5)">
+              <div class="accordion-header__left">
+                <span class="accordion-header__number">⑥</span>
+                <div class="accordion-header__info">
+                  <div class="accordion-header__name">경쟁 차별성</div>
+                  <div class="accordion-header__tagline">이 브랜드만의 독보적인 특징이 명확한가?</div>
+                </div>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body" id="body-5">
+              <div class="accordion-body__inner">
+                <div class="pillar-core-question">"동일 카테고리에서 AI가 이 브랜드를 경쟁사 대신 추천해야 할 분명한 이유가 있는가?"</div>
+                <div class="pillar-detail">
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">평가 포인트</div>
+                    <ul class="pillar-detail__list">
+                      <li>카테고리 내 독보적인 포지셔닝 (최초, 최대, 최고 등)</li>
+                      <li>경쟁사와 명확히 구분되는 USP(고유 판매 제안)</li>
+                      <li>수상, 인증, 특허 등 객관적 차별화 요소</li>
+                      <li>특정 타겟 고객에 대한 명확한 전문성</li>
+                    </ul>
+                  </div>
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">비유</div>
+                    <p class="pillar-detail__text">AI에게 "커피 추천해줘"라고 하면, AI는 가장 명확한 특징이 있는 브랜드를 먼저 떠올립니다. 모든 면에서 무난한 브랜드는 기억되지 않습니다.</p>
+                    <div class="pillar-detail__heading" style="margin-top:12px;">경계</div>
+                    <p class="pillar-detail__text">타겟 세그먼트에서의 차별성이 전체 시장에서의 차별성보다 더 중요할 수 있습니다.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- P7 브랜드 안전성 -->
+          <div class="accordion-item" id="pillar-6">
+            <div class="accordion-header" onclick="toggleAccordion(6)">
+              <div class="accordion-header__left">
+                <span class="accordion-header__number">⑦</span>
+                <div class="accordion-header__info">
+                  <div class="accordion-header__name">브랜드 안전성 <span class="veto-indicator">최소 충족 조건</span></div>
+                  <div class="accordion-header__tagline">브랜드에 부정적인 리스크 요인이 없는가?</div>
+                </div>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body" id="body-6">
+              <div class="accordion-body__inner">
+                <div class="pillar-core-question">"AI가 이 브랜드를 추천했을 때 사용자에게 해를 끼칠 수 있는 리스크가 없는가?"</div>
+                <div class="pillar-detail">
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">평가 포인트</div>
+                    <ul class="pillar-detail__list">
+                      <li>최근 1년 내 주요 논란, 스캔들, 불매운동 여부</li>
+                      <li>법적 분쟁, 소송, 규제 위반 사례</li>
+                      <li>식품/의약품 등 안전 관련 이슈</li>
+                      <li>환경·사회·지배구조(ESG) 리스크</li>
+                    </ul>
+                  </div>
+                  <div class="pillar-detail__section">
+                    <div class="pillar-detail__heading">비유</div>
+                    <p class="pillar-detail__text">AI는 사용자에게 해가 될 수 있는 브랜드를 추천하지 않으려 합니다. 안전성 이슈가 있는 브랜드는 AI가 "이 브랜드는 신중하게 고려하세요"라는 맥락으로 언급합니다.</p>
+                    <div class="pillar-detail__heading" style="margin-top:12px;">경계</div>
+                    <p class="pillar-detail__text">과거의 이슈라도 해결된 경우와 진행 중인 경우를 구분하여 평가합니다. 해결된 이슈는 낮은 패널티를 적용합니다.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 3. 점수 시스템 -->
+      <section class="section">
+        <h2 class="section__title">점수 산출 방식</h2>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;">
+          <!-- GEO 총점 -->
+          <div class="card">
+            <h3 style="font-size:1rem;margin-bottom:8px;">GEO 총점</h3>
+            <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:12px;">7개 Pillar 점수의 단순 평균</p>
+            <div style="font-family:var(--font-mono);font-size:0.875rem;background:var(--bg-card);border:1px solid var(--border-subtle);padding:10px;border-radius:6px;color:var(--green-dark);">
+              GEO = Σ(P1~P7) / 7
+            </div>
+            <p style="font-size:0.8125rem;color:var(--text-dim);margin-top:8px;">0~10점 · 소수점 1자리</p>
+          </div>
+
+          <!-- ARS -->
+          <div class="card">
+            <h3 style="font-size:1rem;margin-bottom:8px;">ARS (AI 추천 점수, AI Recommendation Score)</h3>
+            <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:12px;">7개 항목 점수를 합산한 뒤, 최소 충족 조건 위반 시 상한선을 낮춰 최종 점수를 산출합니다.</p>
+            <div style="background:var(--bg-card);border:1px solid var(--border-subtle);padding:12px 14px;border-radius:6px;display:flex;flex-direction:column;gap:6px;">
+              <div style="font-size:0.8125rem;color:var(--text-secondary);">① 7개 항목 점수를 가중 합산 → <strong style="color:var(--text-primary);">원점수</strong> 계산</div>
+              <div style="font-size:0.8125rem;color:var(--text-secondary);">② 최소 충족 조건(①·⑦) 위반 여부에 따라 <strong style="color:var(--red-accent);">점수 상한선</strong> 결정</div>
+              <div style="font-size:0.8125rem;color:var(--text-secondary);">③ 원점수가 상한선을 초과하면 → <strong style="color:var(--text-primary);">상한선이 최종 점수</strong>로 적용</div>
+            </div>
+            <p style="font-size:0.8125rem;color:var(--text-dim);margin-top:8px;">0~100점 · S/A/B/C/D 등급</p>
+          </div>
+        </div>
+
+        <!-- 감점 규칙 -->
+        <h3 style="font-size:1rem;margin-bottom:12px;color:var(--text-secondary);">ARS 감점 규칙</h3>
+        <div class="veto-grid">
+          <div class="veto-card veto-card--normal">
+            <div class="veto-card__max">최대 100점</div>
+            <div class="veto-card__label">정상</div>
+            <div class="veto-card__cond">P1 ≥ 6점<br>그리고 P7 ≥ 6점</div>
+          </div>
+          <div class="veto-card veto-card--soft">
+            <div class="veto-card__max">최대 50점</div>
+            <div class="veto-card__label">일반 감점</div>
+            <div class="veto-card__cond">P1 ≤ 5점<br>또는 P7 ≤ 5점</div>
+          </div>
+          <div class="veto-card veto-card--hard">
+            <div class="veto-card__max">최대 20점</div>
+            <div class="veto-card__label">강제 감점</div>
+            <div class="veto-card__cond">P1 ≤ 3점<br>또는 P7 ≤ 3점</div>
+          </div>
+        </div>
+
+        <!-- 등급 테이블 -->
+        <h3 style="font-size:1rem;margin-top:24px;margin-bottom:4px;color:var(--text-secondary);">등급 기준</h3>
+        <table class="grade-table">
+          <thead>
+            <tr>
+              <th>등급</th>
+              <th>ARS 점수</th>
+              <th>의미</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:var(--grade-s);">S</td>
+              <td>91 ~ 100점</td>
+              <td style="color:var(--text-muted);">AI가 적극적으로 추천하는 최우수 브랜드</td>
+            </tr>
+            <tr>
+              <td style="color:var(--grade-a);">A</td>
+              <td>81 ~ 90점</td>
+              <td style="color:var(--text-muted);">높은 AI 추천 가능성, 소폭 개선 필요</td>
+            </tr>
+            <tr>
+              <td style="color:var(--grade-b);">B</td>
+              <td>71 ~ 80점</td>
+              <td style="color:var(--text-muted);">평균 이상, 특정 영역 집중 개선 권장</td>
+            </tr>
+            <tr>
+              <td style="color:var(--grade-c);">C</td>
+              <td>51 ~ 70점</td>
+              <td style="color:var(--text-muted);">AI 추천 가능성 낮음, 전반적 개선 필요</td>
+            </tr>
+            <tr>
+              <td style="color:var(--grade-d);">D</td>
+              <td>0 ~ 50점</td>
+              <td style="color:var(--text-muted);">AI 추천 가능성 매우 낮음, 즉각적 개선 필요</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 4. 결과지 샘플 -->
+      <section class="section">
+        <h2 class="section__title">진단 결과 샘플</h2>
+        <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:24px;">
+          아래는 가상의 커피 브랜드 3개의 샘플 결과입니다. 실제 진단 시 Claude AI가 웹 검색을 통해 평가합니다.
+        </p>
+
+        <!-- 점수 카드 3개 -->
+        <div class="demo-score-cards">
+          <!-- 브랜드 A -->
+          <div class="demo-score-card">
+            <div class="demo-score-card__header">
+              <span class="demo-score-card__dot" style="background:#e74c3c;"></span>
+              <span class="demo-score-card__name">브랜드 A</span>
+            </div>
+            <div class="demo-score-card__geo" style="color:#e74c3c;">8.6</div>
+            <div class="demo-score-card__geo-label">GEO 평균 점수</div>
+            <div class="demo-score-card__divider"></div>
+            <div class="demo-score-card__ars-row">
+              <span class="demo-score-card__ars-label">AI 추천 점수:</span>
+              <span class="demo-score-card__ars" style="color:#e74c3c;">86</span>
+            </div>
+          </div>
+          <!-- 브랜드 B -->
+          <div class="demo-score-card">
+            <div class="demo-score-card__header">
+              <span class="demo-score-card__dot" style="background:#3498db;"></span>
+              <span class="demo-score-card__name">브랜드 B</span>
+            </div>
+            <div class="demo-score-card__geo" style="color:#3498db;">7.6</div>
+            <div class="demo-score-card__geo-label">GEO 평균 점수</div>
+            <div class="demo-score-card__divider"></div>
+            <div class="demo-score-card__ars-row">
+              <span class="demo-score-card__ars-label">AI 추천 점수:</span>
+              <span class="demo-score-card__ars" style="color:#3498db;">74</span>
+            </div>
+          </div>
+          <!-- 브랜드 C -->
+          <div class="demo-score-card">
+            <div class="demo-score-card__header">
+              <span class="demo-score-card__dot" style="background:#e67e22;"></span>
+              <span class="demo-score-card__name">브랜드 C</span>
+            </div>
+            <div class="demo-score-card__geo" style="color:#e67e22;">6.6</div>
+            <div class="demo-score-card__geo-label">GEO 평균 점수</div>
+            <div class="demo-score-card__divider"></div>
+            <div class="demo-score-card__ars-row">
+              <span class="demo-score-card__ars-label">AI 추천 점수:</span>
+              <span class="demo-score-card__ars" style="color:#e74c3c;">20</span>
+            </div>
+            <div class="demo-score-card__penalty">⚠️ 최소 충족 조건 위반 → 상한 20점 적용</div>
+          </div>
+        </div>
+
+        <!-- Pillar 선 차트 -->
+        <div style="background:var(--bg-card);border:1px solid var(--border-card);border-radius:12px;padding:24px;margin-top:24px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+            <span style="font-size:0.8125rem;font-weight:700;color:var(--text-secondary);">GEO 7-Pillar 평가 점수</span>
+            <span style="font-size:0.75rem;color:var(--text-muted);">· 브랜드 C는 최소 충족 조건(①·⑦) 위반으로 AI 추천 점수 상한 20점 적용</span>
+          </div>
+          <div style="position:relative;height:320px;">
+            <canvas id="sample-chart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. CTA -->
+      <section class="section" style="text-align:center;padding:40px 0;">
+        <h2 style="font-size:1.75rem;margin-bottom:12px;">지금 브랜드를 진단해보세요</h2>
+        <p style="color:var(--text-muted);margin-bottom:24px;">Claude API Key만 있으면 무료로 분석할 수 있습니다</p>
+        <a href="diagnose.html" class="btn btn--primary btn--lg">🔍 지금 진단하기 →</a>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 푸터 -->
+  <footer class="site-footer">
+    <div class="container">
+      <span class="site-footer__brand">AI ROASTING</span>
+      <span class="site-footer__copy">Generative Engine Optimization</span>
+    </div>
+  </footer>
+
+  <script>
+    // 아코디언 토글
+    function toggleAccordion(index) {
+      const item = document.getElementById('pillar-' + index);
+      const body = document.getElementById('body-' + index);
+      const isOpen = item.classList.contains('is-open');
+
+      // 모두 닫기
+      for (let i = 0; i < 7; i++) {
+        const el = document.getElementById('pillar-' + i);
+        const b = document.getElementById('body-' + i);
+        if (el) el.classList.remove('is-open');
+        if (b) b.style.height = '0';
+      }
+
+      // 현재 항목 열기
+      if (!isOpen) {
+        item.classList.add('is-open');
+        body.style.height = body.scrollHeight + 'px';
+        body.addEventListener('transitionend', function handler() {
+          if (item.classList.contains('is-open')) body.style.height = 'auto';
+          body.removeEventListener('transitionend', handler);
+        });
+      }
+    }
+
+    // 샘플 선 차트
+    (function renderSampleChart() {
+      if (typeof Chart === 'undefined') { setTimeout(renderSampleChart, 100); return; }
+      const canvas = document.getElementById('sample-chart');
+      if (!canvas) return;
+
+      const labels = [
+        '① 수집 접근성 ★',
+        '② 출처 권위도',
+        '③ 정보 충실도',
+        '④ 정보 최신성',
+        '⑤ 서사 일관성',
+        '⑥ 경쟁 차별성',
+        '⑦ 브랜드 안전성 ★'
+      ];
+
+      new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: '브랜드 A',
+              data: [9, 9, 8, 9, 8, 8, 9],
+              borderColor: '#e74c3c',
+              backgroundColor: 'rgba(231,76,60,0.08)',
+              pointBackgroundColor: '#e74c3c',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointRadius: 7,
+              pointHoverRadius: 10,
+              tension: 0.2,
+              borderWidth: 2.5,
+              fill: false
+            },
+            {
+              label: '브랜드 B',
+              data: [7, 8, 8, 7, 7, 9, 7],
+              borderColor: '#3498db',
+              backgroundColor: 'rgba(52,152,219,0.08)',
+              pointBackgroundColor: '#3498db',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointRadius: 7,
+              pointHoverRadius: 10,
+              tension: 0.2,
+              borderWidth: 2.5,
+              fill: false
+            },
+            {
+              label: '브랜드 C (상한 20점)',
+              data: [3, 7, 8, 7, 8, 9, 4],
+              borderColor: '#e67e22',
+              backgroundColor: 'rgba(230,126,34,0.08)',
+              pointBackgroundColor: '#e67e22',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointRadius: 7,
+              pointHoverRadius: 10,
+              tension: 0.2,
+              borderWidth: 2.5,
+              borderDash: [5, 4],
+              fill: false
+            }
+          ]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { color: '#444444', padding: 20, font: { size: 13, weight: '600' } }
+            },
+            tooltip: {
+              backgroundColor: '#ffffff',
+              borderColor: '#e0e0e0',
+              borderWidth: 1,
+              titleColor: '#111111',
+              bodyColor: '#555555',
+              padding: 12
+            }
+          },
+          scales: {
+            x: {
+              min: 0, max: 10,
+              ticks: { stepSize: 1, color: '#888888', font: { size: 12 } },
+              grid: { color: 'rgba(0,0,0,0.06)' }
+            },
+            y: {
+              ticks: { color: '#444444', font: { size: 12 }, padding: 8 },
+              grid: { color: 'rgba(0,0,0,0.04)' }
+            }
+          }
+        }
+      });
+    })();
+
+  </script>
+</body>
+</html>

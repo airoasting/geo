@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>진단 결과 · GEO 7-Pillar</title>
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* 점수 카드 그리드 */
+    .score-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .score-card__brand-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    .score-card__geo-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .score-card__divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 12px 0;
+    }
+
+    .score-card__ars-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .score-card__ars-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+    }
+
+    /* 검증 탭 */
+    .verify-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .verify-input-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .verify-input-wrapper label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* 검증 결과 매트릭스 */
+    .verify-matrix {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .verify-matrix th, .verify-matrix td {
+      padding: 10px 14px;
+      border: 1px solid var(--border-subtle);
+      text-align: center;
+      font-size: 0.875rem;
+    }
+
+    .verify-matrix th {
+      background: var(--bg-card);
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .verify-matrix td:first-child {
+      text-align: left;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    @media (max-width: 900px) {
+      .score-cards { grid-template-columns: 1fr; }
+      .verify-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 페이지 헤더 (JS로 동적 업데이트) -->
+  <header class="page-header" id="page-header">
+    <div class="container">
+      <a href="index.html" class="page-header__back">← 목록으로</a>
+      <h1 class="page-header__title">GEO 진단 결과</h1>
+      <p class="page-header__sub" id="header-sub">로딩 중...</p>
+      <span class="page-header__badge" id="header-badge">분석 결과</span>
+    </div>
+  </header>
+
+  <!-- 메인 -->
+  <main class="page-main" style="flex:1;">
+    <div class="container">
+
+      <!-- 에러 상태 (hidden by default) -->
+      <div id="error-section" style="display:none;">
+        <div class="error-state">
+          <div class="error-state__icon">😕</div>
+          <h2 class="error-state__title" id="error-title">결과를 찾을 수 없습니다</h2>
+          <p class="error-state__desc" id="error-desc">이 결과는 다른 기기에서 생성되었거나 삭제되었습니다.</p>
+          <div style="display:flex;gap:12px;justify-content:center;">
+            <a href="diagnose.html" class="btn btn--primary">🔍 새로 진단하기</a>
+            <a href="history.html" class="btn btn--secondary">📊 히스토리 보기</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 결과 콘텐츠 (hidden by default, shown when data loads) -->
+      <div id="result-section" style="display:none;">
+
+        <!-- AI 엔진 배너 -->
+        <div class="ai-engine-banner" id="ai-banner">
+          <span class="ai-engine-banner__text">
+            ℹ️ 이 결과는 Claude (Anthropic) 기반 분석입니다. ChatGPT, Gemini 등 다른 AI에서는 다른 결과가 나올 수 있습니다.
+          </span>
+          <button class="ai-engine-banner__close" onclick="dismissBanner()">✕</button>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <nav class="tab-nav">
+          <button class="tab-btn active" data-tab="tab-compare" onclick="switchTab('tab-compare', this)">📊 비교</button>
+          <button class="tab-btn" data-tab="tab-improve" onclick="switchTab('tab-improve', this)">🚀 개선</button>
+          <button class="tab-btn" data-tab="tab-verify" onclick="switchTab('tab-verify', this)">🔎 검증</button>
+        </nav>
+
+        <!-- ===== 탭 1: 비교 ===== -->
+        <div class="tab-panel active" id="tab-compare">
+
+          <!-- 점수 카드 -->
+          <div class="score-cards" id="score-cards">
+            <!-- JS로 렌더링 -->
+          </div>
+
+          <!-- 스네이크 차트 -->
+          <div class="chart-wrapper" style="background:var(--bg-card);border:1px solid var(--border-card);border-radius:12px;padding:24px;margin-bottom:32px;">
+            <canvas id="result-chart" height="360"></canvas>
+          </div>
+
+          <!-- Pillar 상세 테이블 -->
+          <h3 style="font-size:1rem;margin-bottom:12px;color:var(--text-secondary);">Pillar별 상세 점수</h3>
+          <div style="overflow-x:auto;">
+            <table class="pillar-table" id="pillar-detail-table">
+              <!-- JS로 렌더링 -->
+            </table>
+          </div>
+        </div>
+
+        <!-- ===== 탭 2: 개선 ===== -->
+        <div class="tab-panel" id="tab-improve">
+          <div id="improve-content">
+            <!-- JS로 렌더링 -->
+          </div>
+        </div>
+
+        <!-- ===== 탭 3: 검증 ===== -->
+        <div class="tab-panel" id="tab-verify">
+          <div class="info-box info-box--warning" style="margin-bottom:20px;">
+            ⚠️ 맥락 검증은 추가 API 요청을 발생시킵니다. 결과는 Claude 기준이며 다른 AI와 다를 수 있습니다.
+          </div>
+
+          <h3 style="font-size:1rem;margin-bottom:16px;color:var(--text-secondary);">테스트 검색 쿼리 입력</h3>
+          <div class="verify-grid">
+            <div class="verify-input-wrapper">
+              <label>쿼리 1</label>
+              <input type="text" id="query-1" class="form-input" placeholder="예: 한국 커피 브랜드 추천">
+            </div>
+            <div class="verify-input-wrapper">
+              <label>쿼리 2</label>
+              <input type="text" id="query-2" class="form-input" placeholder="예: 스페셜티 커피 어디서">
+            </div>
+            <div class="verify-input-wrapper">
+              <label>쿼리 3</label>
+              <input type="text" id="query-3" class="form-input" placeholder="예: AI가 추천하는 카페">
+            </div>
+          </div>
+
+          <button class="btn btn--primary" onclick="runVerification()" id="verify-btn">
+            🔎 맥락 검증 실행
+          </button>
+
+          <div id="verify-results" style="margin-top:24px;display:none;">
+            <h3 style="font-size:1rem;margin-bottom:12px;color:var(--text-secondary);">검증 결과</h3>
+            <div style="overflow-x:auto;">
+              <table class="verify-matrix" id="verify-matrix">
+                <!-- JS로 렌더링 -->
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 하단 액션 바 -->
+        <div class="action-bar">
+          <div class="action-bar__left">
+            <a href="diagnose.html" class="btn btn--secondary">← 새 진단</a>
+            <a href="history.html" class="btn btn--secondary">📊 히스토리</a>
+          </div>
+          <div class="action-bar__right">
+            <button class="btn btn--primary" onclick="exportPDF()">
+              📄 PDF 내보내기
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /result-section -->
+
+    </div>
+  </main>
+
+  <!-- 푸터 -->
+  <footer class="site-footer">
+    <div class="container">
+      <span class="site-footer__brand">AI ROASTING</span>
+      <span class="site-footer__copy">Generative Engine Optimization</span>
+    </div>
+  </footer>
+
+  <script type="module" src="js/result.js"></script>
+</body>
+</html>

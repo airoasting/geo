@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>브랜드 진단 · GEO 7-Pillar</title>
+  <meta name="description" content="3개 브랜드를 동시에 GEO 7-Pillar 기준으로 AI 분석합니다.">
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* 진단 폼 레이아웃 */
+    .diagnose-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    .form-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 32px;
+    }
+
+    .form-card__title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* 브랜드 입력 그리드 */
+    .brands-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .brand-input-wrapper {
+      position: relative;
+    }
+
+    .brand-color-dot {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .brand-color-dot--a { background: var(--brand-a); }
+    .brand-color-dot--b { background: var(--brand-b); }
+    .brand-color-dot--c { background: var(--brand-c); }
+
+    .brand-input-wrapper .form-input {
+      padding-left: 28px;
+    }
+
+    /* 사이드바 */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .sidebar-card__title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 10px;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .step-num {
+      width: 20px;
+      height: 20px;
+      background: var(--red-accent);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* 로딩 상태 오버레이 */
+    #loading-overlay {
+      display: none;
+    }
+
+    /* API Key 모달 내부 */
+    .api-steps {
+      background: #f0f0f0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+
+    .api-steps ol {
+      list-style: decimal;
+      padding-left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .api-steps li {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    .api-steps a {
+      color: var(--blue-info);
+    }
+
+    /* 중복 경고 */
+    #duplicate-warning {
+      display: none;
+      font-size: 0.8125rem;
+      color: var(--yellow-warn);
+      margin-top: 8px;
+    }
+
+    /* 모달 닫기 버튼 */
+    .modal-close-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: rgba(255,255,255,0.4);
+      font-size: 1.25rem;
+      line-height: 1;
+      padding: 2px 4px;
+      transition: color var(--transition-fast);
+      flex-shrink: 0;
+    }
+    .modal-close-btn:hover { color: rgba(255,255,255,0.8); }
+
+    .modal-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: var(--spacing-md);
+    }
+    .modal-title-row .modal-box__title { margin-bottom: 0; }
+
+    /* API Key 스텝 바 */
+    .api-step-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 24px;
+    }
+
+    .api-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .api-step__num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #e0e0e0;
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all var(--transition-base);
+    }
+
+    .api-step--done .api-step__num {
+      background: var(--green-cta);
+      color: white;
+    }
+
+    .api-step__label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .api-step__status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .api-step-divider {
+      font-size: 1rem;
+      color: var(--border-card);
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 900px) {
+      .diagnose-layout { grid-template-columns: 1fr; }
+      .brands-grid { grid-template-columns: 1fr; }
+      .api-step-bar { flex-direction: column; align-items: flex-start; }
+      .api-step-divider { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- API Key 모달 -->
+  <div class="modal-overlay" id="apikey-modal">
+    <div class="modal-box">
+      <div class="modal-title-row">
+        <h2 class="modal-box__title">🔑 Claude API Key 입력</h2>
+        <button class="modal-close-btn" onclick="closeApiKeyModal()" title="닫기">✕</button>
+      </div>
+      <div class="modal-box__desc">
+        분석을 시작하려면 Anthropic Claude API Key가 필요합니다.<br>
+        API Key는 이 브라우저에서만 사용되며, 외부로 전송되지 않습니다.
+      </div>
+
+      <div class="api-steps">
+        <ol>
+          <li><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> 에 접속</li>
+          <li>Settings → API Keys → Create Key</li>
+          <li>생성된 Key를 아래에 붙여넣기</li>
+        </ol>
+      </div>
+
+      <div class="form-group">
+        <label for="api-key-input">API Key</label>
+        <input
+          type="password"
+          id="api-key-input"
+          class="form-input"
+          placeholder="sk-ant-api03-..."
+          autocomplete="off"
+        >
+        <div id="apikey-error" class="form-error" style="display:none;">
+          올바른 형식의 API Key를 입력해주세요 (sk-ant-로 시작)
+        </div>
+      </div>
+
+      <label class="checkbox-group" style="margin-bottom:12px;">
+        <input type="checkbox" id="save-key-checkbox">
+        <span style="font-size:0.875rem;color:var(--text-muted);">이 브라우저에 Key 저장 (localStorage)</span>
+      </label>
+
+      <div class="info-box info-box--warning" style="font-size:0.8125rem;">
+        ⚠️ API 사용 비용은 본인 계정에서 청구됩니다. 하나의 진단은 약 $0.03~0.10 소요됩니다.
+      </div>
+
+      <div id="api-test-status" style="font-size:0.8125rem;min-height:20px;margin-bottom:12px;"></div>
+
+      <div class="modal-box__actions" style="justify-content:space-between;">
+        <button class="btn btn--secondary" onclick="testApiConnection()" style="font-size:0.875rem;">🔌 연결 테스트</button>
+        <button class="btn btn--primary" onclick="confirmApiKey()">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 삭제 확인 모달 (공용) -->
+  <div class="modal-overlay hidden" id="confirm-modal">
+    <div class="modal-box">
+      <h2 class="modal-box__title" id="confirm-title">확인</h2>
+      <p class="modal-box__desc" id="confirm-desc"></p>
+      <div class="modal-box__actions">
+        <button class="btn btn--secondary" onclick="closeConfirmModal()">취소</button>
+        <button class="btn btn--danger" id="confirm-ok-btn">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 페이지 헤더 -->
+  <header class="page-header">
+    <div class="container">
+      <a href="index.html" class="page-header__back">← 목록으로</a>
+      <h1 class="page-header__title">브랜드 진단하기</h1>
+      <p class="page-header__sub">3개 브랜드를 동시에 GEO 7-Pillar 기준으로 분석합니다</p>
+      <span class="page-header__badge">Claude AI · 웹 검색 포함</span>
+    </div>
+  </header>
+
+  <!-- 메인 -->
+  <main class="page-main" style="flex:1;">
+    <div class="container">
+
+      <!-- AI 엔진 배너 -->
+      <div class="ai-engine-banner" id="ai-banner">
+        <span class="ai-engine-banner__text">
+          ℹ️ 이 결과는 Claude (Anthropic) 기반 분석입니다. ChatGPT, Gemini 등 다른 AI에서는 다른 결과가 나올 수 있습니다.
+        </span>
+        <button class="ai-engine-banner__close" onclick="dismissBanner()">✕</button>
+      </div>
+
+      <!-- 로딩 상태 -->
+      <div id="loading-overlay">
+        <div class="loading-state">
+          <div class="spinner spinner--lg" style="margin:0 auto 20px;"></div>
+          <p class="loading-state__title">⏳ AI가 브랜드를 분석하고 있습니다</p>
+          <div class="loading-state__brands" id="brand-statuses">
+            <!-- JS로 렌더링 -->
+          </div>
+          <p class="loading-state__note">※ 3개 브랜드 동시 분석 · 30초 내외 소요</p>
+        </div>
+      </div>
+
+      <!-- 진단 폼 -->
+      <div id="form-section">
+
+        <!-- API Key 스텝 바 -->
+        <div class="api-step-bar" id="api-step-bar">
+          <div class="api-step" id="step1-block">
+            <div class="api-step__num" id="step1-num">1</div>
+            <div>
+              <div class="api-step__label">API Key 준비</div>
+              <div class="api-step__status" id="step1-status">
+                <button class="btn btn--primary" style="font-size:0.75rem;padding:5px 14px;" onclick="showApiKeyModal()">🔑 API Key 입력하기</button>
+              </div>
+            </div>
+          </div>
+          <div class="api-step-divider">→</div>
+          <div class="api-step api-step--done">
+            <div class="api-step__num">2</div>
+            <div>
+              <div class="api-step__label">브랜드 입력 · 진단 시작</div>
+              <div class="api-step__status">아래 폼에 브랜드명을 입력하세요</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diagnose-layout">
+          <!-- 왼쪽: 폼 -->
+          <div>
+            <div class="form-card">
+              <h2 class="form-card__title">📋 진단 정보 입력</h2>
+
+              <form id="diagnose-form" onsubmit="handleSubmit(event)">
+                <!-- 브랜드 입력 -->
+                <div class="form-group">
+                  <label>브랜드 <span class="required">*</span></label>
+                  <div class="brands-grid">
+                    <div class="brand-input-wrapper">
+                      <span class="brand-color-dot brand-color-dot--a"></span>
+                      <input
+                        type="text"
+                        id="brand-a"
+                        class="form-input"
+                        placeholder="브랜드 A (예: 스타벅스)"
+                        maxlength="50"
+                        oninput="checkFormValidity()"
+                      >
+                    </div>
+                    <div class="brand-input-wrapper">
+                      <span class="brand-color-dot brand-color-dot--b"></span>
+                      <input
+                        type="text"
+                        id="brand-b"
+                        class="form-input"
+                        placeholder="브랜드 B (예: 블루보틀)"
+                        maxlength="50"
+                        oninput="checkFormValidity()"
+                      >
+                    </div>
+                    <div class="brand-input-wrapper">
+                      <span class="brand-color-dot brand-color-dot--c"></span>
+                      <input
+                        type="text"
+                        id="brand-c"
+                        class="form-input"
+                        placeholder="브랜드 C (예: 이디야)"
+                        maxlength="50"
+                        oninput="checkFormValidity()"
+                      >
+                    </div>
+                  </div>
+                  <div id="duplicate-warning">⚠️ 동일한 브랜드명이 있습니다. 서로 다른 브랜드를 입력해주세요.</div>
+                </div>
+
+                <!-- 산업군 선택 -->
+                <div class="form-group">
+                  <label for="industry-select">산업군 <span class="required">*</span></label>
+                  <select id="industry-select" class="form-select" onchange="handleIndustryChange()">
+                    <option value="">산업군을 선택하세요</option>
+                    <optgroup label="제조업">
+                      <option value="전기·전자">전기·전자</option>
+                      <option value="자동차">자동차</option>
+                      <option value="화학·소재">화학·소재</option>
+                      <option value="철강·금속">철강·금속</option>
+                      <option value="식품·음료">식품·음료</option>
+                      <option value="의류·패션">의류·패션</option>
+                      <option value="화장품·뷰티">화장품·뷰티</option>
+                    </optgroup>
+                    <optgroup label="서비스업">
+                      <option value="금융·보험">금융·보험</option>
+                      <option value="통신·미디어">통신·미디어</option>
+                      <option value="유통·리테일">유통·리테일</option>
+                      <option value="음식점·카페">음식점·카페</option>
+                      <option value="숙박·여행">숙박·여행</option>
+                      <option value="교육·이러닝">교육·이러닝</option>
+                      <option value="의료·헬스케어">의료·헬스케어</option>
+                      <option value="게임·엔터테인먼트">게임·엔터테인먼트</option>
+                    </optgroup>
+                    <optgroup label="IT·기술">
+                      <option value="소프트웨어·SaaS">소프트웨어·SaaS</option>
+                      <option value="반도체·디스플레이">반도체·디스플레이</option>
+                      <option value="플랫폼·커머스">플랫폼·커머스</option>
+                      <option value="AI·데이터">AI·데이터</option>
+                    </optgroup>
+                    <optgroup label="기타">
+                      <option value="건설·부동산">건설·부동산</option>
+                      <option value="에너지·환경">에너지·환경</option>
+                      <option value="other">기타 (직접 입력)</option>
+                    </optgroup>
+                  </select>
+                  <input
+                    type="text"
+                    id="industry-custom"
+                    class="form-input"
+                    placeholder="산업군을 직접 입력해주세요"
+                    style="display:none;margin-top:8px;"
+                    maxlength="50"
+                    oninput="checkFormValidity()"
+                  >
+                </div>
+
+                <div id="form-tooltip" class="form-hint" style="margin-bottom:16px;">
+                  브랜드 3개와 산업군을 모두 입력해주세요
+                </div>
+
+                <button type="submit" id="submit-btn" class="btn btn--primary btn--full btn--lg" disabled>
+                  🔍 AI 평가 시작
+                </button>
+              </form>
+            </div>
+
+            <!-- API Key 변경 -->
+            <div style="margin-top:12px;text-align:center;">
+              <button
+                onclick="showApiKeyModal()"
+                style="font-size:0.8125rem;color:var(--text-dim);background:none;border:none;cursor:pointer;text-decoration:underline;"
+              >
+                🔑 API Key 변경
+              </button>
+            </div>
+          </div>
+
+          <!-- 오른쪽: 사이드바 -->
+          <div class="sidebar">
+            <div class="sidebar-card">
+              <div class="sidebar-card__title">⚡ 분석 과정</div>
+              <div class="step-list">
+                <div class="step-item">
+                  <span class="step-num">1</span>
+                  <span>Claude AI가 웹 검색으로 각 브랜드 정보를 수집합니다</span>
+                </div>
+                <div class="step-item">
+                  <span class="step-num">2</span>
+                  <span>GEO 7-Pillar 기준으로 0~10점 채점합니다</span>
+                </div>
+                <div class="step-item">
+                  <span class="step-num">3</span>
+                  <span>개선 우선순위와 액션 아이템을 제안합니다</span>
+                </div>
+                <div class="step-item">
+                  <span class="step-num">4</span>
+                  <span>3개 브랜드 비교 결과를 차트로 시각화합니다</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sidebar-card">
+              <div class="sidebar-card__title">💡 입력 팁</div>
+              <div class="step-list">
+                <div class="step-item">
+                  <span style="color:var(--green-cta);font-weight:700;flex-shrink:0;">✓</span>
+                  <span>같은 산업군의 경쟁 브랜드를 비교하세요</span>
+                </div>
+                <div class="step-item">
+                  <span style="color:var(--green-cta);font-weight:700;flex-shrink:0;">✓</span>
+                  <span>정확한 브랜드명을 입력하세요 (영어 또는 한국어)</span>
+                </div>
+                <div class="step-item">
+                  <span style="color:var(--yellow-warn);font-weight:700;flex-shrink:0;">!</span>
+                  <span>소규모 브랜드는 정보 부족으로 정확도가 낮을 수 있습니다</span>
+                </div>
+              </div>
+            </div>
+
+            <a href="framework.html" class="sidebar-card" style="text-decoration:none;color:inherit;display:block;">
+              <div class="sidebar-card__title">📖 프레임워크 이해하기</div>
+              <p style="font-size:0.8125rem;color:var(--text-muted);">
+                GEO 7-Pillar가 무엇인지, 각 기준이 어떻게 평가되는지 알아보세요
+              </p>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 푸터 -->
+  <footer class="site-footer">
+    <div class="container">
+      <span class="site-footer__brand">AI ROASTING</span>
+      <span class="site-footer__copy">Generative Engine Optimization</span>
+    </div>
+  </footer>
+
+  <!-- API Key 관리 (file:// 환경 포함 전 구간 동작 보장) -->
+  <script>
+    // 모듈과 공유하는 전역 API Key
+    window._currentApiKey = '';
+
+    function _loadApiKey() {
+      return localStorage.getItem('geo_api_key') || sessionStorage.getItem('geo_api_key_session') || null;
+    }
+    function _saveApiKey(key, persist) {
+      if (persist) {
+        localStorage.setItem('geo_api_key', key);
+        sessionStorage.removeItem('geo_api_key_session');
+      } else {
+        sessionStorage.setItem('geo_api_key_session', key);
+        localStorage.removeItem('geo_api_key');
+      }
+    }
+    function _validateKeyFormat(key) {
+      return typeof key === 'string' && key.startsWith('sk-ant-') && key.length > 20;
+    }
+
+    function updateStepBar() {
+      var step1Block = document.getElementById('step1-block');
+      var step1Num   = document.getElementById('step1-num');
+      var step1Status = document.getElementById('step1-status');
+      if (!step1Block) return;
+      if (window._currentApiKey) {
+        step1Block.classList.add('api-step--done');
+        step1Num.textContent = '✓';
+        step1Status.innerHTML = '<span style="color:var(--green-cta);font-weight:600;">✔ API Key 입력됨</span>'
+          + ' <button style="font-size:0.7rem;color:var(--text-dim);background:none;border:none;cursor:pointer;text-decoration:underline;margin-left:6px;" onclick="showApiKeyModal()">변경</button>';
+      } else {
+        step1Block.classList.remove('api-step--done');
+        step1Num.textContent = '1';
+        step1Status.innerHTML = '<button class="btn btn--primary" style="font-size:0.75rem;padding:5px 14px;" onclick="showApiKeyModal()">🔑 API Key 입력하기</button>';
+      }
+    }
+
+    function showApiKeyModal() {
+      var input = document.getElementById('api-key-input');
+      if (input) input.value = window._currentApiKey;
+      document.getElementById('apikey-modal').classList.remove('hidden');
+    }
+    function closeApiKeyModal() {
+      document.getElementById('apikey-modal').classList.add('hidden');
+    }
+    function confirmApiKey() {
+      var input = document.getElementById('api-key-input');
+      var key = input.value.trim();
+      var errorEl = document.getElementById('apikey-error');
+      if (!_validateKeyFormat(key)) {
+        errorEl.style.display = 'block';
+        input.focus();
+        return;
+      }
+      errorEl.style.display = 'none';
+      window._currentApiKey = key;
+      var persist = document.getElementById('save-key-checkbox').checked;
+      _saveApiKey(key, persist);
+      document.getElementById('apikey-modal').classList.add('hidden');
+      updateStepBar();
+    }
+
+    // 폼 유효성 검사 (모듈 없이도 버튼 활성화)
+    function checkFormValidity() {
+      var a = (document.getElementById('brand-a') || {}).value || '';
+      var b = (document.getElementById('brand-b') || {}).value || '';
+      var c = (document.getElementById('brand-c') || {}).value || '';
+      a = a.trim(); b = b.trim(); c = c.trim();
+      var industry = (document.getElementById('industry-select') || {}).value || '';
+      var custom = ((document.getElementById('industry-custom') || {}).value || '').trim();
+
+      var industryValid = industry && (industry !== 'other' || custom.length > 0);
+      var brandsValid = a.length > 0 && b.length > 0 && c.length > 0;
+      var noDuplicates = (new Set([a, b, c])).size === 3;
+
+      var dupWarn = document.getElementById('duplicate-warning');
+      if (dupWarn) dupWarn.style.display = brandsValid && !noDuplicates ? 'block' : 'none';
+
+      var submitBtn = document.getElementById('submit-btn');
+      if (submitBtn) submitBtn.disabled = !(brandsValid && industryValid && noDuplicates);
+
+      var tooltip = document.getElementById('form-tooltip');
+      if (tooltip) {
+        if (!brandsValid) tooltip.textContent = '브랜드 3개를 모두 입력해주세요';
+        else if (!industryValid) tooltip.textContent = '산업군을 선택해주세요';
+        else if (!noDuplicates) tooltip.textContent = '서로 다른 브랜드명을 입력해주세요';
+        else tooltip.textContent = '✅ 준비 완료! 분석을 시작하세요';
+      }
+    }
+    function handleIndustryChange() {
+      var sel = document.getElementById('industry-select');
+      var cus = document.getElementById('industry-custom');
+      if (cus) cus.style.display = sel.value === 'other' ? 'block' : 'none';
+      checkFormValidity();
+    }
+
+    // API 연결 테스트
+    window.testApiConnection = async function() {
+      var key = (document.getElementById('api-key-input') || {}).value || '';
+      key = key.trim();
+      var statusEl = document.getElementById('api-test-status');
+      if (!statusEl) return;
+
+      // 1. 키 형식 검사
+      if (!_validateKeyFormat(key)) {
+        statusEl.innerHTML = '<span style="color:var(--red-accent);">❌ API Key 형식 오류 (sk-ant-로 시작해야 합니다)</span>';
+        return;
+      }
+      statusEl.innerHTML = '<span style="color:var(--text-muted);">⏳ 연결 테스트 중...</span>';
+
+      // 2. 프록시 URL 확인
+      var proxyUrl = window._PROXY_URL || '';
+      if (!proxyUrl || proxyUrl.indexOf('YOUR-ACCOUNT') !== -1) {
+        statusEl.innerHTML = '<span style="color:var(--yellow-warn);">✅ Key 형식 정상 &nbsp;|&nbsp; ⚠️ 프록시 서버 미설정 (Cloudflare Worker 배포 필요)</span>';
+        return;
+      }
+
+      // 3. 실제 API 호출 테스트 (최소 요청)
+      try {
+        var resp = await fetch(proxyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': key },
+          body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 10, messages: [{ role: 'user', content: 'ping' }] }),
+          signal: AbortSignal.timeout(10000)
+        });
+        if (resp.status === 401) {
+          statusEl.innerHTML = '<span style="color:var(--red-accent);">❌ API Key가 유효하지 않습니다</span>';
+        } else if (resp.ok || resp.status === 200) {
+          statusEl.innerHTML = '<span style="color:var(--green-cta);">✅ 연결 성공! API Key와 프록시가 정상 작동합니다</span>';
+        } else {
+          statusEl.innerHTML = '<span style="color:var(--red-accent);">❌ 프록시 오류 (HTTP ' + resp.status + ')</span>';
+        }
+      } catch (e) {
+        statusEl.innerHTML = '<span style="color:var(--red-accent);">❌ 연결 실패: ' + (e.message || '네트워크 오류') + '</span>';
+      }
+    };
+
+    // 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+      var saved = _loadApiKey();
+      if (saved) {
+        window._currentApiKey = saved;
+        document.getElementById('apikey-modal').classList.add('hidden');
+      }
+      updateStepBar();
+    });
+  </script>
+
+  <script type="module">
+    import { loadApiKey, saveApiKey, validateKeyFormat } from './js/apikey.js';
+    import { analyzeAllBrands, PROXY_URL } from './js/api.js';
+    import { calculateGeoTotal, calculateARS } from './js/calculator.js';
+    import { validateAndFillFallback } from './js/fallback.js';
+    import { saveResult } from './js/storage.js';
+
+    // 프록시 URL 전역 노출 (연결 테스트용)
+    window._PROXY_URL = PROXY_URL;
+
+    function hideModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // 폼 제출
+    window.handleSubmit = async function(event) {
+      event.preventDefault();
+
+      const a = document.getElementById('brand-a').value.trim();
+      const b = document.getElementById('brand-b').value.trim();
+      const c = document.getElementById('brand-c').value.trim();
+      const industrySelect = document.getElementById('industry-select').value;
+      const industryCustom = document.getElementById('industry-custom').value.trim();
+      const industry = industrySelect === 'other' ? industryCustom : industrySelect;
+      const brands = [a, b, c];
+
+      // 로딩 UI 표시
+      document.getElementById('form-section').style.display = 'none';
+      const loadingEl = document.getElementById('loading-overlay');
+      loadingEl.style.display = 'block';
+
+      const statusContainer = document.getElementById('brand-statuses');
+      statusContainer.innerHTML = brands.map((brand, i) => `
+        <div class="brand-status" id="status-${i}">
+          <div class="spinner"></div>
+          <span>${brand} 분석 중...</span>
+        </div>
+      `).join('');
+
+      // API 호출
+      const results = await analyzeAllBrands(brands, industry, window._currentApiKey, (index, success) => {
+        const el = document.getElementById(`status-${index}`);
+        if (success) {
+          el.innerHTML = `<span style="color:var(--green-cta);">✅</span><span>${brands[index]} 완료</span>`;
+          el.classList.add('brand-status--done');
+        } else {
+          el.innerHTML = `<span style="color:var(--red-accent);">❌</span><span>${brands[index]} 실패</span>`;
+          el.classList.add('brand-status--error');
+        }
+      });
+
+      // 성공한 결과 처리
+      const successResults = results.filter(r => !r._error);
+      if (successResults.length === 0) {
+        alert('모든 브랜드 분석에 실패했습니다. API Key와 네트워크 연결을 확인해주세요.');
+        document.getElementById('form-section').style.display = 'block';
+        loadingEl.style.display = 'none';
+        return;
+      }
+
+      // 점수 계산 및 폴백 적용
+      const processedResults = results.map((r, i) => {
+        if (r._error) return { brand: brands[i], _error: r._error };
+        const withFallback = validateAndFillFallback(r);
+        const geoTotal = calculateGeoTotal(withFallback.pillars);
+        const arsResult = calculateARS(withFallback.pillars);
+        return {
+          ...withFallback,
+          geo_total: geoTotal,
+          ars: arsResult.ars,
+          ars_max: arsResult.arsMax,
+          ars_grade: arsResult.grade,
+        };
+      });
+
+      // 저장 및 리다이렉트
+      const id = Date.now().toString();
+      saveResult({
+        id,
+        date: new Date().toISOString(),
+        industry,
+        brands: processedResults,
+      });
+
+      window.location.href = `result.html?id=${id}`;
+    };
+
+    // AI 배너 닫기
+    window.dismissBanner = function() {
+      sessionStorage.setItem('ai_banner_dismissed', '1');
+      const banner = document.getElementById('ai-banner');
+      if (banner) banner.style.display = 'none';
+    };
+
+    if (sessionStorage.getItem('ai_banner_dismissed')) {
+      const banner = document.getElementById('ai-banner');
+      if (banner) banner.style.display = 'none';
+    }
+
+    // 확인 모달
+    window.closeConfirmModal = function() {
+      document.getElementById('confirm-modal').classList.add('hidden');
+    };
+
+  </script>
+</body>
+</html>
