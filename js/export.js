@@ -10,7 +10,25 @@ export async function exportResultToPDF(result) {
   const improveTab  = document.getElementById('tab-improve');
   const compareBtns = document.querySelectorAll('.tab-btn');
 
-  // 비교 탭 활성화
+  // ① 차트 캡처를 DOM 조작 전 가장 먼저 수행
+  const chartCanvas = document.getElementById('result-chart');
+  let chartImg = null;
+  if (chartCanvas) {
+    const naturalH = chartCanvas.offsetHeight || chartCanvas.height || 400;
+    const dataUrl = chartCanvas.toDataURL('image/png');
+    chartImg = document.createElement('img');
+    chartImg.id = 'chart-print-img';
+    chartImg.style.cssText = `display:block;width:100%;height:${naturalH}px;object-fit:contain;`;
+    // 데이터 URL 로드 완료 대기
+    await new Promise(resolve => {
+      chartImg.onload = resolve;
+      chartImg.onerror = resolve;
+      chartImg.src = dataUrl;
+    });
+    chartCanvas.parentNode.insertBefore(chartImg, chartCanvas);
+  }
+
+  // ② 비교 탭 활성화
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   if (compareTab) {
     compareTab.classList.add('active');
@@ -19,7 +37,7 @@ export async function exportResultToPDF(result) {
     });
   }
 
-  // 개선 탭을 강제 렌더링 (display:none 상태에서는 Chrome이 콘텐츠 높이를 0으로 계산)
+  // ③ 개선 탭을 강제 렌더링 (display:none 상태에서는 Chrome이 콘텐츠 높이를 0으로 계산)
   if (improveTab) {
     improveTab.style.display = 'block';
     improveTab.style.height = 'auto';
@@ -27,18 +45,7 @@ export async function exportResultToPDF(result) {
     void improveTab.offsetHeight; // 동기 리플로우 강제 유발
   }
 
-  // 차트 canvas → <img> 변환 (canvas는 인쇄 불가)
-  const chartCanvas = document.getElementById('result-chart');
-  let chartImg = null;
-  if (chartCanvas) {
-    chartImg = document.createElement('img');
-    chartImg.id = 'chart-print-img';
-    chartImg.src = chartCanvas.toDataURL('image/png');
-    chartImg.style.cssText = 'width:100%;height:auto;display:block;';
-    chartCanvas.parentNode.insertBefore(chartImg, chartCanvas);
-  }
-
-  // rAF 2프레임 + 400ms 대기 (Chrome 레이아웃 완료 보장)
+  // ④ rAF 2프레임 + 400ms 대기 (Chrome 레이아웃 완료 보장)
   await new Promise(resolve =>
     requestAnimationFrame(() =>
       requestAnimationFrame(() => setTimeout(resolve, 400))
@@ -47,7 +54,7 @@ export async function exportResultToPDF(result) {
 
   window.print();
 
-  // 인쇄 후 원상복귀
+  // ⑤ 인쇄 후 원상복귀
   if (chartImg) chartImg.remove();
   if (improveTab) {
     improveTab.style.display = '';
