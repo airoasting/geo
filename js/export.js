@@ -20,13 +20,26 @@ export async function exportResultToPDF(result) {
   }
 
   // 개선 탭을 강제 렌더링 (display:none 상태에서는 Chrome이 콘텐츠 높이를 0으로 계산)
-  if (improveTab) improveTab.style.display = 'block';
+  if (improveTab) {
+    improveTab.style.display = 'block';
+    improveTab.style.height = 'auto';
+    improveTab.style.overflow = 'visible';
+    void improveTab.offsetHeight; // 동기 리플로우 강제 유발
+  }
 
-  // DOM 레이아웃 반영 대기
-  await new Promise(resolve => setTimeout(resolve, 300));
+  // rAF 2프레임 + 400ms 대기 (Chrome 레이아웃 완료 보장)
+  await new Promise(resolve =>
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => setTimeout(resolve, 400))
+    )
+  );
 
   window.print();
 
-  // 인쇄 후 개선 탭 원상복귀 (print CSS가 별도로 제어)
-  if (improveTab) improveTab.style.display = '';
+  // 인쇄 후 개선 탭 원상복귀
+  if (improveTab) {
+    improveTab.style.display = '';
+    improveTab.style.height = '';
+    improveTab.style.overflow = '';
+  }
 }
