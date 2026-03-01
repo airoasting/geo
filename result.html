@@ -246,15 +246,21 @@
 
   <style>
     @media print {
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
       .ai-engine-banner, .tab-nav, .action-bar, .site-footer,
       .page-header__back, .page-header__badge, #score-tooltip { display: none !important; }
       .tab-panel { display: block !important; }
-      .page-header { background: #fff; color: #111; padding: 16px 0; }
-      .page-header__title { color: #111; font-size: 1.25rem; }
-      .page-header__sub { color: #444; }
-      body { background: #fff; }
+      .page-header { background: #fff !important; padding: 16px 0; }
+      .page-header__title { color: #111 !important; font-size: 1.25rem; }
+      .page-header__sub { color: #444 !important; }
+      body { background: #fff !important; }
       .chart-wrapper { break-inside: avoid; }
       .score-cards { break-inside: avoid; }
+      p, span, div, td, th, label { color: inherit; }
     }
   </style>
 
