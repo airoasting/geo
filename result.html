@@ -251,16 +251,45 @@
         print-color-adjust: exact !important;
         color-adjust: exact !important;
       }
+
+      /* 불필요한 UI 숨김 */
       .ai-engine-banner, .tab-nav, .action-bar, .site-footer,
       .page-header__back, .page-header__badge, #score-tooltip { display: none !important; }
+
+      /* 모든 탭 패널 표시 */
       .tab-panel { display: block !important; }
-      .page-header { background: #fff !important; padding: 16px 0; }
-      .page-header__title { color: #111 !important; font-size: 1.25rem; }
-      .page-header__sub { color: #444 !important; }
-      body { background: #fff !important; }
-      .chart-wrapper { break-inside: avoid; }
-      .score-cards { break-inside: avoid; }
-      p, span, div, td, th, label { color: inherit; }
+
+      /* 헤더 — 밝은 배경 + 어두운 텍스트 */
+      .page-header {
+        background: #ffffff !important;
+        border-bottom: 2px solid #222 !important;
+        padding: 12px 0 !important;
+      }
+      .page-header::before { display: none !important; }
+      .page-header * { color: #111111 !important; }
+      .page-header__title { font-size: 1.25rem !important; }
+      .page-header__sub { color: #444444 !important; }
+
+      /* 바디 배경 */
+      body, .page-main { background: #ffffff !important; }
+
+      /* 점수 카드 — 3열 강제 유지 */
+      .score-cards {
+        grid-template-columns: repeat(3, 1fr) !important;
+        break-inside: avoid;
+      }
+
+      /* 차트 영역 */
+      .chart-wrapper {
+        break-inside: avoid;
+        overflow: visible !important;
+      }
+
+      /* 테이블 */
+      .pillar-table th, .pillar-table td { color: #333333 !important; }
+
+      /* 개선 카드 */
+      .improvement-card { break-inside: avoid; }
     }
   </style>
 
