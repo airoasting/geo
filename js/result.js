@@ -112,7 +112,7 @@ function renderScoreCards(brands) {
         ${b.brand}
       </div>
       <div class="score-card__geo-value" style="font-size:2.5rem;font-weight:800;">
-        ${b.geo_total ?? '-'}
+        ${b.geo_total != null ? Number(b.geo_total).toFixed(1) : '-'}
       </div>
       <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:12px;">GEO 총점 / 10</div>
       <div class="score-card__divider" style="height:1px;background:var(--border-subtle);margin:12px 0;"></div>
