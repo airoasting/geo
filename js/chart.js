@@ -7,78 +7,58 @@ import { PILLAR_LABELS, PILLAR_KEYS } from './pillars-data.js';
 // 차트 인스턴스 캐시 (재렌더 방지)
 const chartInstances = {};
 
-// 브랜드 이름을 첫 번째 점(P1) 위에 그리는 커스텀 플러그인
+// 브랜드 이름을 P1 데이터 포인트 바로 위에 그리는 커스텀 플러그인
 const brandLabelPlugin = {
   id: 'brandLabels',
   afterDraw(chart) {
     const ctx = chart.ctx;
     const datasets = chart.data.datasets;
 
-    const points = datasets.map((dataset, i) => {
-      const meta = chart.getDatasetMeta(i);
-      if (!meta.visible || !meta.data[0]) return null;
-      return {
-        x: meta.data[0].x,
-        y: meta.data[0].y,
-        color: dataset.borderColor,
-        label: dataset.label
-      };
-    }).filter(Boolean);
-
-    if (points.length === 0) return;
-
     ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, 0, chart.canvas.width, chart.canvas.height);
-    ctx.clip();
     ctx.font = 'bold 12px system-ui, -apple-system, sans-serif';
 
-    // 각 라벨 텍스트 너비 측정
-    points.forEach(pt => { pt.tw = ctx.measureText(pt.label).width; });
+    // 각 데이터셋의 P1(첫 번째 점) 픽셀 좌표 수집
+    const labels = datasets.map((dataset, i) => {
+      const meta = chart.getDatasetMeta(i);
+      if (!meta.visible || !meta.data[0]) return null;
+      const pt = meta.data[0];
+      const tw = ctx.measureText(dataset.label).width;
+      return { x: pt.x, y: pt.y, color: dataset.borderColor, label: dataset.label, tw };
+    }).filter(Boolean);
 
-    // x 기준 그룹핑: 10px 이내 = 같은 x 위치로 간주 → 수평 1열 배치
-    const groups = [];
-    points.forEach(pt => {
-      const g = groups.find(g => Math.abs(g.cx - pt.x) < 10);
-      if (g) {
-        g.items.push(pt);
-        g.cx = g.items.reduce((s, p) => s + p.x, 0) / g.items.length;
-      } else {
-        groups.push({ cx: pt.x, cy: pt.y, items: [pt] });
-      }
-    });
+    if (labels.length === 0) { ctx.restore(); return; }
 
-    // 그룹별 배치: 같은 그룹은 수평으로 펼침, 다른 그룹은 y를 올려 충돌 회피
-    const GAP = 20; // 라벨 간 수평 간격
+    const pad = 5;
+    const h = 17;
+
+    // x 기준 정렬 후 수직 충돌 방지
+    const sorted = [...labels].sort((a, b) => a.x - b.x);
     const placed = [];
-    groups.forEach(group => {
-      const widths  = group.items.map(p => p.tw);
-      const totalW  = widths.reduce((s, w) => s + w, 0) + GAP * (group.items.length - 1);
-      const baseY   = Math.max(group.cy - 22, 12);
-      let   startX  = group.cx - totalW / 2;
 
-      group.items.forEach((pt, i) => {
-        const lx = startX + widths[i] / 2;
-        placed.push({ lx, ly: baseY, label: pt.label, color: pt.color, tw: pt.tw });
-        startX += widths[i] + GAP;
-      });
+    sorted.forEach(lbl => {
+      let ly = lbl.y - 22; // 데이터 포인트 22px 위
+      // 이미 배치된 라벨과 겹치면 위로 올림
+      for (const p of placed) {
+        const horizOverlap = Math.abs(p.x - lbl.x) < (lbl.tw / 2 + p.tw / 2 + pad * 2 + 6);
+        if (horizOverlap && Math.abs(p.ly - ly) < h + 2) {
+          ly = Math.min(p.ly, ly) - (h + 4);
+        }
+      }
+      ly = Math.max(ly, 10);
+      placed.push({ x: lbl.x, ly, label: lbl.label, color: lbl.color, tw: lbl.tw });
     });
 
-    // 라벨 렌더링
-    placed.forEach(({ lx, ly, label, color, tw }) => {
-      const pad = 5;
-      const h = 17;
-      // 흰 배경 + 브랜드 컬러 테두리
+    // 라벨 렌더링: 각 브랜드의 P1 점수 위치 바로 위
+    placed.forEach(({ x, ly, label, color, tw }) => {
       ctx.fillStyle = 'rgba(255,255,255,0.97)';
-      ctx.fillRect(lx - tw / 2 - pad, ly - h + 3, tw + pad * 2, h);
+      ctx.fillRect(x - tw / 2 - pad, ly - h + 3, tw + pad * 2, h);
       ctx.strokeStyle = color;
       ctx.lineWidth = 1.5;
-      ctx.strokeRect(lx - tw / 2 - pad, ly - h + 3, tw + pad * 2, h);
-      // 텍스트
+      ctx.strokeRect(x - tw / 2 - pad, ly - h + 3, tw + pad * 2, h);
       ctx.fillStyle = color;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
-      ctx.fillText(label, lx, ly);
+      ctx.fillText(label, x, ly);
     });
 
     ctx.restore();

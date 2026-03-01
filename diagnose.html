@@ -434,9 +434,15 @@
 
       <div id="api-test-status" style="font-size:0.8125rem;min-height:20px;margin-bottom:12px;"></div>
 
-      <div class="modal-box__actions" style="justify-content:space-between;">
-        <button class="btn btn--secondary" onclick="testApiConnection()" style="font-size:0.875rem;">🔌 연결 테스트</button>
-        <button class="btn btn--primary" onclick="confirmApiKey()">확인</button>
+      <div class="modal-box__actions" style="justify-content:space-between;align-items:center;">
+        <button
+          id="test-api-btn"
+          onclick="testApiConnection()"
+          style="font-size:0.9rem;font-weight:700;background:#2980b9;color:#fff;border:none;border-radius:9px;padding:11px 22px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background 150ms;"
+          onmouseover="this.style.background='#1f6390'"
+          onmouseout="this.style.background='#2980b9'"
+        >🔌 연결 테스트</button>
+        <button class="btn btn--primary" id="confirm-api-btn" onclick="confirmApiKey()" disabled style="opacity:0.35;cursor:not-allowed;">확인</button>
       </div>
     </div>
   </div>
@@ -722,6 +728,8 @@
   <script>
     // 모듈과 공유하는 전역 API Key
     window._currentApiKey = '';
+    // 연결 테스트 통과 여부
+    window._apiTestPassed = false;
 
     function _loadApiKey() {
       return localStorage.getItem('geo_api_key') || sessionStorage.getItem('geo_api_key_session') || null;
@@ -756,15 +764,36 @@
       }
     }
 
+    function _setConfirmEnabled(enabled) {
+      var btn = document.getElementById('confirm-api-btn');
+      if (!btn) return;
+      btn.disabled = !enabled;
+      btn.style.opacity = enabled ? '1' : '0.35';
+      btn.style.cursor  = enabled ? 'pointer' : 'not-allowed';
+    }
+
     function showApiKeyModal() {
       var input = document.getElementById('api-key-input');
-      if (input) input.value = window._currentApiKey;
+      if (input) {
+        input.value = window._currentApiKey;
+        // 키가 바뀌면 테스트 초기화
+        input.oninput = function() {
+          window._apiTestPassed = false;
+          _setConfirmEnabled(false);
+          document.getElementById('api-test-status').innerHTML = '';
+        };
+      }
+      // 모달 열릴 때 테스트 상태 초기화
+      window._apiTestPassed = false;
+      _setConfirmEnabled(false);
+      document.getElementById('api-test-status').innerHTML = '';
       document.getElementById('apikey-modal').classList.remove('hidden');
     }
     function closeApiKeyModal() {
       document.getElementById('apikey-modal').classList.add('hidden');
     }
     function confirmApiKey() {
+      if (!window._apiTestPassed) return; // 테스트 미통과 시 차단
       var input = document.getElementById('api-key-input');
       var key = input.value.trim();
       var errorEl = document.getElementById('apikey-error');
@@ -822,6 +851,9 @@
       var statusEl = document.getElementById('api-test-status');
       if (!statusEl) return;
 
+      window._apiTestPassed = false;
+      _setConfirmEnabled(false);
+
       // 1. 키 형식 검사
       if (!_validateKeyFormat(key)) {
         statusEl.innerHTML = '<span style="color:var(--red-accent);">❌ API Key 형식 오류 (sk-ant-로 시작해야 합니다)</span>';
@@ -833,6 +865,8 @@
       var proxyUrl = window._PROXY_URL || '';
       if (!proxyUrl || proxyUrl.indexOf('YOUR-ACCOUNT') !== -1) {
         statusEl.innerHTML = '<span style="color:var(--yellow-warn);">✅ Key 형식 정상 &nbsp;|&nbsp; ⚠️ 프록시 서버 미설정 (Cloudflare Worker 배포 필요)</span>';
+        window._apiTestPassed = true;
+        _setConfirmEnabled(true);
         return;
       }
 
@@ -848,6 +882,8 @@
           statusEl.innerHTML = '<span style="color:var(--red-accent);">❌ API Key가 유효하지 않습니다</span>';
         } else if (resp.ok || resp.status === 200) {
           statusEl.innerHTML = '<span style="color:var(--green-cta);">✅ 연결 성공! API Key와 프록시가 정상 작동합니다</span>';
+          window._apiTestPassed = true;
+          _setConfirmEnabled(true);
         } else {
           statusEl.innerHTML = '<span style="color:var(--red-accent);">❌ 프록시 오류 (HTTP ' + resp.status + ')</span>';
         }

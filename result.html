@@ -157,20 +157,13 @@
 
         <!-- 탭 네비게이션 -->
         <nav class="tab-nav">
-          <button class="tab-btn active" data-tab="tab-improve" onclick="switchTab('tab-improve', this)">개선 방향</button>
-          <button class="tab-btn" data-tab="tab-compare" onclick="switchTab('tab-compare', this)">점수 비교</button>
+          <button class="tab-btn active" data-tab="tab-compare" onclick="switchTab('tab-compare', this)">점수 비교</button>
+          <button class="tab-btn" data-tab="tab-improve" onclick="switchTab('tab-improve', this)">개선 방향</button>
           <button class="tab-btn" data-tab="tab-verify" onclick="switchTab('tab-verify', this)">추가 검증</button>
         </nav>
 
-        <!-- ===== 탭 1: 개선 방향 (첫 번째로 이동) ===== -->
-        <div class="tab-panel active" id="tab-improve">
-          <div id="improve-content">
-            <!-- JS로 렌더링 -->
-          </div>
-        </div>
-
-        <!-- ===== 탭 2: 비교 ===== -->
-        <div class="tab-panel" id="tab-compare">
+        <!-- ===== 탭 1: 점수 비교 ===== -->
+        <div class="tab-panel active" id="tab-compare">
 
           <!-- 점수 카드 용어 설명 -->
           <div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap;">
@@ -200,6 +193,13 @@
             <table class="pillar-table" id="pillar-detail-table">
               <!-- JS로 렌더링 -->
             </table>
+          </div>
+        </div>
+
+        <!-- ===== 탭 2: 개선 방향 ===== -->
+        <div class="tab-panel" id="tab-improve">
+          <div id="improve-content">
+            <!-- JS로 렌더링 -->
           </div>
         </div>
 
