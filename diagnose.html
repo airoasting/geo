@@ -639,13 +639,21 @@
               </form>
             </div>
 
-            <!-- API Key 변경 -->
-            <div style="margin-top:12px;text-align:center;">
+            <!-- API Key 변경 / 삭제 -->
+            <div style="margin-top:12px;text-align:center;display:flex;align-items:center;justify-content:center;gap:16px;">
               <button
                 onclick="showApiKeyModal()"
                 style="font-size:0.8125rem;color:var(--text-dim);background:none;border:none;cursor:pointer;text-decoration:underline;"
               >
                 🔑 API Key 변경
+              </button>
+              <span style="color:var(--border-card);font-size:0.75rem;">|</span>
+              <button
+                id="delete-key-btn"
+                onclick="deleteApiKey()"
+                style="font-size:0.8125rem;color:var(--red-accent);background:none;border:none;cursor:pointer;text-decoration:underline;display:none;"
+              >
+                🗑 저장된 Key 삭제
               </button>
             </div>
           </div>
@@ -751,17 +759,28 @@
       var step1Block = document.getElementById('step1-block');
       var step1Num   = document.getElementById('step1-num');
       var step1Status = document.getElementById('step1-status');
+      var deleteBtn  = document.getElementById('delete-key-btn');
       if (!step1Block) return;
       if (window._currentApiKey) {
         step1Block.classList.add('api-step--done');
         step1Num.textContent = '✓';
         step1Status.innerHTML = '<span style="color:var(--green-cta);font-weight:600;">✔ API Key 입력됨</span>'
           + ' <button style="font-size:0.7rem;color:var(--text-dim);background:none;border:none;cursor:pointer;text-decoration:underline;margin-left:6px;" onclick="showApiKeyModal()">변경</button>';
+        if (deleteBtn) deleteBtn.style.display = '';
       } else {
         step1Block.classList.remove('api-step--done');
         step1Num.textContent = '1';
         step1Status.innerHTML = '<button class="btn btn--primary" style="font-size:0.75rem;padding:5px 14px;" onclick="showApiKeyModal()">🔑 API Key 입력하기</button>';
+        if (deleteBtn) deleteBtn.style.display = 'none';
       }
+    }
+
+    function deleteApiKey() {
+      if (!confirm('저장된 API Key를 삭제하시겠습니까?\n삭제 후 진단을 시작하려면 Key를 다시 입력해야 합니다.')) return;
+      localStorage.removeItem('geo_api_key');
+      sessionStorage.removeItem('geo_api_key_session');
+      window._currentApiKey = '';
+      updateStepBar();
     }
 
     function _setConfirmEnabled(enabled) {
