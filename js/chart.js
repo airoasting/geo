@@ -49,7 +49,7 @@ const brandLabelPlugin = {
     });
 
     // 그룹별 배치: 같은 그룹은 수평으로 펼침, 다른 그룹은 y를 올려 충돌 회피
-    const GAP = 8; // 라벨 간 수평 간격
+    const GAP = 20; // 라벨 간 수평 간격
     const placed = [];
     groups.forEach(group => {
       const widths  = group.items.map(p => p.tw);
