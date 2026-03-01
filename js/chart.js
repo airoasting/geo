@@ -7,49 +7,51 @@ import { PILLAR_LABELS, PILLAR_KEYS } from './pillars-data.js';
 // 차트 인스턴스 캐시 (재렌더 방지)
 const chartInstances = {};
 
-// 브랜드 이름을 1줄로, P1 점수 위치 기준 수평 배치하는 커스텀 플러그인
+// 브랜드 이름을 P1 점수 위치 기준 1줄로 배치하는 커스텀 플러그인
 const brandLabelPlugin = {
   id: 'brandLabels',
   afterDraw(chart) {
     const ctx = chart.ctx;
-    const datasets = chart.data.datasets;
+    const xScale = chart.scales.x;
+    const yScale = chart.scales.y;
+    if (!xScale || !yScale) return;
+
+    // y: 첫 번째 pillar(①) 행의 픽셀 y, 22px 위
+    const firstRowY = yScale.getPixelForValue(0);
+    const ly = Math.max(firstRowY - 22, 10);
 
     ctx.save();
     ctx.font = 'bold 12px system-ui, -apple-system, sans-serif';
 
-    // 각 데이터셋의 P1(첫 번째 점) 픽셀 좌표 수집
-    const labels = datasets.map((dataset, i) => {
+    // 각 dataset의 P1 점수값 → x 픽셀 변환
+    const labels = chart.data.datasets.map((dataset, i) => {
       const meta = chart.getDatasetMeta(i);
-      if (!meta.visible || !meta.data[0]) return null;
-      const pt = meta.data[0];
+      if (!meta.visible) return null;
+      const p1val = dataset.data[0];
+      if (p1val == null) return null;
+      const x = xScale.getPixelForValue(p1val);
       const tw = ctx.measureText(dataset.label).width;
-      return { x: pt.x, y: pt.y, color: dataset.borderColor, label: dataset.label, tw };
+      return { x, color: dataset.borderColor, label: dataset.label, tw };
     }).filter(Boolean);
 
-    if (labels.length === 0) { ctx.restore(); return; }
+    if (!labels.length) { ctx.restore(); return; }
 
-    const pad = 5;
-    const h = 17;
-    const minGap = 6; // 라벨 간 최소 수평 간격
+    const pad = 5, h = 17, minGap = 6;
 
-    // 모든 라벨을 같은 y줄에: P1의 y에서 22px 위
-    const ly = Math.max(Math.min(...labels.map(l => l.y)) - 22, 10);
-
-    // x 기준 정렬 후 겹치면 오른쪽으로 밀어서 1줄 유지
+    // x 기준 정렬 → 겹치면 오른쪽으로 밀어서 1줄 유지
     const sorted = [...labels].sort((a, b) => a.x - b.x);
     const placed = [];
-
     sorted.forEach(lbl => {
       let lx = lbl.x;
       for (const p of placed) {
         const minDist = p.tw / 2 + lbl.tw / 2 + pad * 2 + minGap;
         if (lx - p.lx < minDist) lx = p.lx + minDist;
       }
-      placed.push({ lx, ly, label: lbl.label, color: lbl.color, tw: lbl.tw });
+      placed.push({ lx, label: lbl.label, color: lbl.color, tw: lbl.tw });
     });
 
-    // 라벨 렌더링 (모두 같은 y)
-    placed.forEach(({ lx, ly, label, color, tw }) => {
+    // 렌더링
+    placed.forEach(({ lx, label, color, tw }) => {
       ctx.fillStyle = 'rgba(255,255,255,0.97)';
       ctx.fillRect(lx - tw / 2 - pad, ly - h + 3, tw + pad * 2, h);
       ctx.strokeStyle = color;
