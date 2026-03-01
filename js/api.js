@@ -8,9 +8,9 @@ import { parseApiResponse } from './fallback.js';
 // 예: 'https://geo-proxy.YOUR-ACCOUNT.workers.dev'
 export const PROXY_URL = 'https://9872.jaydenjkang.workers.dev';
 
-const TIMEOUT_MS = 90000; // 90초
-const MODEL = 'claude-sonnet-4-6';
-const MAX_TOKENS = 2000;
+const TIMEOUT_MS = 60000; // 60초
+const MODEL = 'claude-haiku-4-5-20251001'; // Sonnet 대비 5~10배 빠름
+const MAX_TOKENS = 1500;
 
 /**
  * 단일 브랜드 Claude API 호출
@@ -106,17 +106,21 @@ function getErrorMessage(errorCode) {
  */
 export async function analyzeAllBrands(brands, industry, apiKey, onStatusUpdate) {
   const brandPromises = brands.map((brand, i) => {
-    const p = callClaudeAPI(brand, industry, apiKey);
+    // 실패 시 1회 재시도
+    const attempt = () => callClaudeAPI(brand, industry, apiKey);
+    const pWithRetry = attempt().catch(() => {
+      return new Promise(r => setTimeout(r, 2000)).then(attempt);
+    });
 
-    // 개별 완료 상태 업데이트 (Promise.all 이전에 처리)
-    p.then(() => {
+    // 개별 완료 상태 업데이트
+    pWithRetry.then(() => {
       if (onStatusUpdate) onStatusUpdate(i, true);
     }).catch(() => {
       if (onStatusUpdate) onStatusUpdate(i, false);
     });
 
     // 부분 실패 격리: 에러를 resolve로 변환
-    return p.catch(err => ({
+    return pWithRetry.catch(err => ({
       brand,
       _error: err.message,
       _errorMessage: getErrorMessage(err.message)
