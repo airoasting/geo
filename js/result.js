@@ -85,8 +85,12 @@ function renderHeader(result, validBrands) {
   });
   const brandNames = result.brands.map(b => b.brand).filter(Boolean).join(' vs ');
 
-  document.getElementById('header-sub').textContent =
-    `${date} · ${result.industry} · ${brandNames}`;
+  const subText = `${date} · ${result.industry} · ${brandNames}`;
+  document.getElementById('header-sub').textContent = subText;
+
+  // 인쇄용 부제 동기화
+  const printSub = document.getElementById('print-sub');
+  if (printSub) printSub.textContent = subText;
 
   // 최고 등급 표시
   const grades = validBrands.map(b => b.ars_grade).filter(Boolean);
