@@ -84,24 +84,34 @@ export function validateAndFillFallback(brandResult) {
 }
 
 /**
- * API 응답 JSON 파싱 (Claude가 markdown 코드 블록으로 감쌀 때 처리)
+ * API 응답 JSON 파싱 (다양한 형식 대응)
  * @param {string} text - API 응답 텍스트
  * @returns {Object|null}
  */
 export function parseApiResponse(text) {
+  if (!text || typeof text !== 'string') return null;
+
+  // 1) 순수 JSON
   try {
-    // 순수 JSON인 경우
-    return JSON.parse(text);
-  } catch {
-    // markdown 코드 블록 제거 후 재시도
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        return JSON.parse(jsonMatch[0]);
-      } catch {
-        return null;
-      }
-    }
-    return null;
+    return JSON.parse(text.trim());
+  } catch { /* 계속 */ }
+
+  // 2) ```json ... ``` 또는 ``` ... ``` 코드 블록 추출
+  const codeBlock = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (codeBlock) {
+    try {
+      return JSON.parse(codeBlock[1].trim());
+    } catch { /* 계속 */ }
   }
+
+  // 3) 텍스트 내 첫 { 부터 마지막 } 까지 추출
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start !== -1 && end !== -1 && end > start) {
+    try {
+      return JSON.parse(text.slice(start, end + 1));
+    } catch { /* 계속 */ }
+  }
+
+  return null;
 }
