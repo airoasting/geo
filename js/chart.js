@@ -14,7 +14,6 @@ const brandLabelPlugin = {
     const ctx = chart.ctx;
     const datasets = chart.data.datasets;
 
-    // 각 데이터셋의 첫 번째 점(P1) 위치 수집
     const points = datasets.map((dataset, i) => {
       const meta = chart.getDatasetMeta(i);
       if (!meta.visible || !meta.data[0]) return null;
@@ -28,46 +27,52 @@ const brandLabelPlugin = {
 
     if (points.length === 0) return;
 
-    // x 위치 기준 정렬 (좌→우)
-    points.sort((a, b) => a.x - b.x);
-
-    // 캔버스 전체로 클립 해제 (padding 영역에 그리기 위해)
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, 0, chart.canvas.width, chart.canvas.height);
     ctx.clip();
-
     ctx.font = 'bold 12px system-ui, -apple-system, sans-serif';
 
-    // 겹침 방지: 이전 라벨과 x가 가까우면 y를 위로 올림
-    const drawnLabels = [];
-    points.forEach((pt) => {
-      const text = pt.label;
-      const textWidth = ctx.measureText(text).width;
-      const x = pt.x;
-      let y = pt.y - 16;
+    // 각 라벨 텍스트 너비 측정
+    points.forEach(pt => { pt.tw = ctx.measureText(pt.label).width; });
 
-      // 기존 라벨과 x 거리가 40px 미만이면 위로 회피
-      for (const prev of drawnLabels) {
-        if (Math.abs(prev.x - x) < textWidth / 2 + ctx.measureText(prev.label).width / 2 + 8) {
-          y = Math.min(y, prev.y - 18);
-        }
+    // x 기준 정렬 (좌→우)
+    points.sort((a, b) => a.x - b.x);
+
+    // 배치 결정: 겹치는 라벨은 위로 이동하며 재배치
+    const placed = [];
+    points.forEach(pt => {
+      let ly = pt.y - 22;
+      for (let attempt = 0; attempt < 8; attempt++) {
+        const testY = Math.max(pt.y - 22 - attempt * 22, 12);
+        const clash = placed.some(prev => {
+          const xClose = Math.abs(prev.lx - pt.x) < (prev.tw + pt.tw) / 2 + 10;
+          const yClose = Math.abs(prev.ly - testY) < 18;
+          return xClose && yClose;
+        });
+        if (!clash) { ly = testY; break; }
+        ly = testY;
       }
-      // 캔버스 상단 밖으로 나가지 않도록
-      y = Math.max(y, 14);
+      placed.push({ lx: pt.x, ly, label: pt.label, color: pt.color, tw: pt.tw });
+    });
 
-      drawnLabels.push({ x, y, label: text });
-
-      // 텍스트 배경 (가독성)
-      ctx.fillStyle = 'rgba(248,248,248,0.92)';
-      ctx.fillRect(x - textWidth / 2 - 4, y - 14, textWidth + 8, 16);
-
-      // 브랜드명
-      ctx.fillStyle = pt.color;
+    // 라벨 렌더링
+    placed.forEach(({ lx, ly, label, color, tw }) => {
+      const pad = 5;
+      const h = 17;
+      // 흰 배경 + 브랜드 컬러 테두리
+      ctx.fillStyle = 'rgba(255,255,255,0.97)';
+      ctx.fillRect(lx - tw / 2 - pad, ly - h + 3, tw + pad * 2, h);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(lx - tw / 2 - pad, ly - h + 3, tw + pad * 2, h);
+      // 텍스트
+      ctx.fillStyle = color;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
-      ctx.fillText(text, x, y);
+      ctx.fillText(label, lx, ly);
     });
+
     ctx.restore();
   }
 };
@@ -195,6 +200,7 @@ function _renderChart(canvasId, brands, isDemo, originalBrands) {
                   if (line) lines.push(line.trim());
                 }
               }
+              lines.push(''); // 브랜드별 구분 빈 줄
               return lines;
             }
           }

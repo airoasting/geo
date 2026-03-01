@@ -116,18 +116,153 @@
       margin-top: 1px;
     }
 
-    /* 로딩 상태 오버레이 — 전체 화면 중앙 고정 */
+    /* ===== 로딩 오버레이 리디자인 ===== */
     #loading-overlay { display: none; }
     #loading-overlay.is-active {
       display: flex;
       position: fixed;
       inset: 0;
       z-index: 50;
-      background: #ffffff;
+      background: #f7f7f8;
       align-items: center;
       justify-content: center;
     }
-    #loading-overlay .loading-state { padding: 0; }
+
+    .loading-inner {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    /* 상단 뱃지 */
+    .loading-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #111;
+      color: #fff;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 5px 14px 5px 10px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+    }
+    .loading-badge__dot {
+      width: 7px; height: 7px;
+      background: #e74c3c;
+      border-radius: 50%;
+      animation: badgePulse 1.4s ease-in-out infinite;
+    }
+    @keyframes badgePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.75); }
+    }
+
+    /* 타이틀 */
+    .loading-title {
+      font-size: 1.4375rem;
+      font-weight: 800;
+      color: #111;
+      letter-spacing: -0.025em;
+      margin-bottom: 6px;
+    }
+    .loading-subtitle {
+      font-size: 0.8125rem;
+      color: #888;
+      margin-bottom: 28px;
+    }
+
+    /* 스캔 진행 바 */
+    .loading-progress {
+      height: 2px;
+      background: #e5e5e5;
+      border-radius: 2px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .loading-progress__fill {
+      height: 100%;
+      width: 30%;
+      background: linear-gradient(90deg, #e74c3c 0%, #f39c12 100%);
+      border-radius: 2px;
+      animation: scanBar 2.2s ease-in-out infinite;
+    }
+    @keyframes scanBar {
+      0%   { width: 5%;  margin-left: 0; }
+      50%  { width: 55%; margin-left: 40%; }
+      100% { width: 5%;  margin-left: 95%; }
+    }
+
+    /* 브랜드 카드 */
+    .loading-brands {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .loading-brand-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 10px;
+      padding: 12px 16px;
+      text-align: left;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .loading-brand-item.brand-status--done  { border-color: #2ecc71; background: rgba(46,204,113,0.04); }
+    .loading-brand-item.brand-status--error { border-color: #e74c3c; background: rgba(231,76,60,0.04);  }
+
+    .loading-brand-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .loading-brand-info { flex: 1; }
+    .loading-brand-name  { font-size: 0.9375rem; font-weight: 700; color: #111; display: block; }
+    .loading-brand-state { font-size: 0.75rem; color: #999; display: block; margin-top: 1px; }
+    .loading-brand-spinner { flex-shrink: 0; display: flex; align-items: center; }
+
+    /* 7 Pillar 뱃지 */
+    .loading-pillars {
+      display: flex;
+      gap: 5px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .loading-pillar {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      background: #ececec;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: #bbb;
+      animation: pillarFade 3.5s ease-in-out infinite;
+    }
+    .loading-pillar:nth-child(1) { animation-delay: 0s; }
+    .loading-pillar:nth-child(2) { animation-delay: 0.5s; }
+    .loading-pillar:nth-child(3) { animation-delay: 1s; }
+    .loading-pillar:nth-child(4) { animation-delay: 1.5s; }
+    .loading-pillar:nth-child(5) { animation-delay: 2s; }
+    .loading-pillar:nth-child(6) { animation-delay: 2.5s; }
+    .loading-pillar:nth-child(7) { animation-delay: 3s; }
+    @keyframes pillarFade {
+      0%, 80%, 100% { background: #ececec; color: #bbb; }
+      40%            { background: #e74c3c; color: #fff; }
+    }
+
+    .loading-note {
+      font-size: 0.75rem;
+      color: #aaa;
+      letter-spacing: 0.01em;
+    }
 
     /* API Key 모달 내부 */
     .api-steps {
@@ -340,13 +475,27 @@
 
       <!-- 로딩 상태 -->
       <div id="loading-overlay">
-        <div class="loading-state">
-          <div class="spinner spinner--lg" style="margin:0 auto 20px;"></div>
-          <p class="loading-state__title">⏳ AI가 브랜드를 분석하고 있습니다</p>
-          <div class="loading-state__brands" id="brand-statuses">
+        <div class="loading-inner">
+          <div class="loading-badge">
+            <span class="loading-badge__dot"></span>
+            GEO AI ENGINE
+          </div>
+          <h2 class="loading-title">AI가 브랜드를 분석하고 있습니다</h2>
+          <p class="loading-subtitle">GEO 7-Pillar 기준으로 동시에 평가 중입니다</p>
+          <div class="loading-progress"><div class="loading-progress__fill"></div></div>
+          <div class="loading-brands" id="brand-statuses">
             <!-- JS로 렌더링 -->
           </div>
-          <p class="loading-state__note">※ 3개 브랜드 동시 분석 · 10~20초 내외 소요</p>
+          <div class="loading-pillars">
+            <span class="loading-pillar">①</span>
+            <span class="loading-pillar">②</span>
+            <span class="loading-pillar">③</span>
+            <span class="loading-pillar">④</span>
+            <span class="loading-pillar">⑤</span>
+            <span class="loading-pillar">⑥</span>
+            <span class="loading-pillar">⑦</span>
+          </div>
+          <p class="loading-note">약 10~20초 소요 · Claude AI 기반 분석</p>
         </div>
       </div>
 
@@ -733,11 +882,18 @@
       const loadingEl = document.getElementById('loading-overlay');
       loadingEl.classList.add('is-active');
 
+      const brandColors = ['#e74c3c', '#3498db', '#2ecc71'];
       const statusContainer = document.getElementById('brand-statuses');
       statusContainer.innerHTML = brands.map((brand, i) => `
-        <div class="brand-status" id="status-${i}">
-          <div class="spinner"></div>
-          <span>${brand} 분석 중...</span>
+        <div class="loading-brand-item" id="status-${i}">
+          <span class="loading-brand-dot" style="background:${brandColors[i]};"></span>
+          <div class="loading-brand-info">
+            <span class="loading-brand-name">${brand}</span>
+            <span class="loading-brand-state">분석 중...</span>
+          </div>
+          <div class="loading-brand-spinner">
+            <div class="spinner" style="width:18px;height:18px;border-width:2px;"></div>
+          </div>
         </div>
       `).join('');
 
@@ -745,10 +901,24 @@
       const results = await analyzeAllBrands(brands, industry, window._currentApiKey, (index, success) => {
         const el = document.getElementById(`status-${index}`);
         if (success) {
-          el.innerHTML = `<span style="color:var(--green-cta);">✅</span><span>${brands[index]} 완료</span>`;
+          el.innerHTML = `
+            <span class="loading-brand-dot" style="background:#2ecc71;"></span>
+            <div class="loading-brand-info">
+              <span class="loading-brand-name">${brands[index]}</span>
+              <span class="loading-brand-state" style="color:#2ecc71;">분석 완료</span>
+            </div>
+            <div class="loading-brand-spinner" style="color:#2ecc71;font-size:1.1rem;font-weight:700;">✓</div>
+          `;
           el.classList.add('brand-status--done');
         } else {
-          el.innerHTML = `<span style="color:var(--red-accent);">❌</span><span>${brands[index]} 실패</span>`;
+          el.innerHTML = `
+            <span class="loading-brand-dot" style="background:#e74c3c;"></span>
+            <div class="loading-brand-info">
+              <span class="loading-brand-name">${brands[index]}</span>
+              <span class="loading-brand-state" style="color:#e74c3c;">분석 실패</span>
+            </div>
+            <div class="loading-brand-spinner" style="color:#e74c3c;font-size:1.1rem;font-weight:700;">✗</div>
+          `;
           el.classList.add('brand-status--error');
         }
       });

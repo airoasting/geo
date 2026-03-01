@@ -13,13 +13,28 @@ export async function exportResultToPDF(result) {
   // ① 차트 캡처를 DOM 조작 전 가장 먼저 수행
   const chartCanvas = document.getElementById('result-chart');
   let chartImg = null;
+  let chartInstance = null;
   if (chartCanvas) {
-    const naturalH = chartCanvas.offsetHeight || chartCanvas.height || 400;
-    const dataUrl = chartCanvas.toDataURL('image/png');
+    const cssW = chartCanvas.offsetWidth || 800;
+    const cssH = chartCanvas.offsetHeight || 400;
+
+    // Chart.js 반응형 리사이즈 비활성화 (DOM 조작 중 차트 늘어남 방지)
+    chartInstance = typeof Chart !== 'undefined' ? Chart.getChart(chartCanvas) : null;
+    if (chartInstance) chartInstance.options.responsive = false;
+
+    // 흰 배경 위에 차트 합성 (투명 PNG 문제 해결)
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = chartCanvas.width;
+    tempCanvas.height = chartCanvas.height;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.fillStyle = '#f8f8f8';
+    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+    tempCtx.drawImage(chartCanvas, 0, 0);
+
+    const dataUrl = tempCanvas.toDataURL('image/png');
     chartImg = document.createElement('img');
     chartImg.id = 'chart-print-img';
-    chartImg.style.cssText = `display:block;width:100%;height:${naturalH}px;object-fit:contain;`;
-    // 데이터 URL 로드 완료 대기
+    chartImg.style.cssText = `display:block;width:${cssW}px;height:${cssH}px;max-width:100%;`;
     await new Promise(resolve => {
       chartImg.onload = resolve;
       chartImg.onerror = resolve;
@@ -56,6 +71,10 @@ export async function exportResultToPDF(result) {
 
   // ⑤ 인쇄 후 원상복귀
   if (chartImg) chartImg.remove();
+  if (chartInstance) {
+    chartInstance.options.responsive = true;
+    chartInstance.resize(); // 원래 크기로 복원
+  }
   if (improveTab) {
     improveTab.style.display = '';
     improveTab.style.height = '';
