@@ -256,8 +256,9 @@
       .ai-engine-banner, .tab-nav, .action-bar, .site-footer,
       .page-header__back, .page-header__badge, #score-tooltip { display: none !important; }
 
-      /* 모든 탭 패널 표시 */
-      .tab-panel { display: block !important; }
+      /* 비교 탭만 표시, 나머지 숨김 */
+      #tab-compare { display: block !important; }
+      #tab-improve, #tab-verify { display: none !important; }
 
       /* 헤더 — 밝은 배경 + 어두운 텍스트 */
       .page-header {

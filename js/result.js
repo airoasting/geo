@@ -105,7 +105,12 @@ function renderScoreCards(brands) {
   const colors = ['var(--brand-a)', 'var(--brand-b)', 'var(--brand-c)'];
   const container = document.getElementById('score-cards');
 
-  container.innerHTML = brands.map((b, i) => `
+  container.innerHTML = brands.map((b, i) => {
+    const hasInsufficient = b.pillars && Object.values(b.pillars).some(
+      p => p?.reason?.includes('정보 불충분')
+    );
+
+    return `
     <div class="score-card" style="text-align:center;padding:20px;">
       <div class="score-card__brand" style="margin-bottom:12px;">
         <span class="score-card__brand-dot" style="background:${colors[i]};"></span>
@@ -128,8 +133,14 @@ function renderScoreCards(brands) {
           ⚠️ 상한 ${b.ars_max}점 (Veto 적용)
         </div>
       ` : ''}
+      ${hasInsufficient ? `
+        <div style="font-size:0.7rem;color:var(--red-accent);margin-top:8px;padding:4px 8px;background:rgba(220,53,69,0.08);border-radius:6px;border:1px solid rgba(220,53,69,0.2);">
+          ⚠️ 학습 데이터 부족 → 1점 처리
+        </div>
+      ` : ''}
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 /**
