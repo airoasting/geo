@@ -225,7 +225,7 @@
             <a href="history.html" class="btn btn--secondary">📊 히스토리</a>
           </div>
           <div class="action-bar__right">
-            <button class="btn btn--primary" onclick="exportPDF()">
+            <button class="btn btn--primary" id="pdf-btn" onclick="exportPDF()">
               📄 PDF 내보내기
             </button>
           </div>
@@ -256,9 +256,22 @@
       .ai-engine-banner, .tab-nav, .action-bar, .site-footer,
       .page-header__back, .page-header__badge, #score-tooltip { display: none !important; }
 
-      /* 비교 탭만 표시, 나머지 숨김 */
-      #tab-compare { display: block !important; }
-      #tab-improve, #tab-verify { display: none !important; }
+      /* 비교 + 개선 탭 표시, 검증 탭 숨김 */
+      #tab-compare, #tab-improve { display: block !important; }
+      #tab-verify { display: none !important; }
+
+      /* 개선 탭은 새 페이지에서 시작, 내용 전체 출력 */
+      #tab-improve {
+        break-before: page;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+      }
+      #improve-content {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+      }
 
       /* 헤더 — 밝은 배경 + 어두운 텍스트 */
       .page-header {

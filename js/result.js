@@ -258,6 +258,9 @@ window.switchTab = function(tabId, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById(tabId).classList.add('active');
+
+  const pdfBtn = document.getElementById('pdf-btn');
+  if (pdfBtn) pdfBtn.style.display = tabId === 'tab-compare' ? '' : 'none';
 };
 
 /**
