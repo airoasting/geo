@@ -10,7 +10,7 @@ const chartInstances = {};
 // 브랜드 이름을 첫 번째 점(P1) 위에 그리는 커스텀 플러그인
 const brandLabelPlugin = {
   id: 'brandLabels',
-  afterDatasetsDraw(chart) {
+  afterDraw(chart) {
     const ctx = chart.ctx;
     const datasets = chart.data.datasets;
 
@@ -31,28 +31,36 @@ const brandLabelPlugin = {
     // x 위치 기준 정렬 (좌→우)
     points.sort((a, b) => a.x - b.x);
 
-    // 겹침 방지: x 거리가 가까우면 y를 엇갈리게
-    const labelYList = points.map((p, i) => {
-      let baseY = p.y - 14;
-      for (let j = 0; j < i; j++) {
-        if (Math.abs(points[j].x - p.x) < 50) {
-          baseY = Math.min(baseY, points[j].y - 28 - (i - j - 1) * 14);
-        }
-      }
-      return baseY;
-    });
-
+    // 캔버스 전체로 클립 해제 (padding 영역에 그리기 위해)
     ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, chart.canvas.width, chart.canvas.height);
+    ctx.clip();
+
     ctx.font = 'bold 12px system-ui, -apple-system, sans-serif';
-    points.forEach((pt, i) => {
+
+    // 겹침 방지: 이전 라벨과 x가 가까우면 y를 위로 올림
+    const drawnLabels = [];
+    points.forEach((pt) => {
       const text = pt.label;
       const textWidth = ctx.measureText(text).width;
       const x = pt.x;
-      const y = labelYList[i];
+      let y = pt.y - 16;
+
+      // 기존 라벨과 x 거리가 40px 미만이면 위로 회피
+      for (const prev of drawnLabels) {
+        if (Math.abs(prev.x - x) < textWidth / 2 + ctx.measureText(prev.label).width / 2 + 8) {
+          y = Math.min(y, prev.y - 18);
+        }
+      }
+      // 캔버스 상단 밖으로 나가지 않도록
+      y = Math.max(y, 14);
+
+      drawnLabels.push({ x, y, label: text });
 
       // 텍스트 배경 (가독성)
-      ctx.fillStyle = 'rgba(248,248,248,0.88)';
-      ctx.fillRect(x - textWidth / 2 - 4, y - 13, textWidth + 8, 16);
+      ctx.fillStyle = 'rgba(248,248,248,0.92)';
+      ctx.fillRect(x - textWidth / 2 - 4, y - 14, textWidth + 8, 16);
 
       // 브랜드명
       ctx.fillStyle = pt.color;
@@ -95,12 +103,18 @@ export function renderResultChart(canvasId, brands) {
 
   const colors = ['#e74c3c', '#3498db', '#2ecc71'];
 
-  const chartBrands = brands.map((b, i) => ({
-    brand: b.brand || `브랜드 ${String.fromCharCode(65 + i)}`,
-    color: colors[i] || '#999',
-    scores: PILLAR_KEYS.map(key => b.pillars?.[key]?.score ?? 0),
-    reasons: PILLAR_KEYS.map(key => b.pillars?.[key]?.reason ?? '정보 없음')
-  }));
+  const chartBrands = brands.map((b, i) => {
+    const baseName = b.brand || `브랜드 ${String.fromCharCode(65 + i)}`;
+    const labelName = b.ars_max && b.ars_max < 100
+      ? `${baseName} (상한 ${b.ars_max}점)`
+      : baseName;
+    return {
+      brand: labelName,
+      color: colors[i] || '#999',
+      scores: PILLAR_KEYS.map(key => b.pillars?.[key]?.score ?? 0),
+      reasons: PILLAR_KEYS.map(key => b.pillars?.[key]?.reason ?? '정보 없음')
+    };
+  });
 
   _renderChart(canvasId, chartBrands, false, brands);
 }
