@@ -284,8 +284,17 @@
       .page-header__title { font-size: 1.25rem !important; }
       .page-header__sub { color: #444444 !important; }
 
-      /* 바디 배경 */
-      body, .page-main { background: #ffffff !important; }
+      /* 바디 — flex 레이아웃 리셋 (print에서 min-height:100vh가 내용을 밀어냄) */
+      body {
+        display: block !important;
+        min-height: 0 !important;
+        background: #ffffff !important;
+      }
+      .page-main {
+        flex: none !important;
+        background: #ffffff !important;
+        padding: 16px 0 !important;
+      }
 
       /* 점수 카드 — 3열 강제 유지 */
       .score-cards {
