@@ -7,7 +7,7 @@ import { PILLAR_LABELS, PILLAR_KEYS } from './pillars-data.js';
 // 차트 인스턴스 캐시 (재렌더 방지)
 const chartInstances = {};
 
-// 브랜드 이름을 P1 데이터 포인트 바로 위에 그리는 커스텀 플러그인
+// 브랜드 이름을 1줄로, P1 점수 위치 기준 수평 배치하는 커스텀 플러그인
 const brandLabelPlugin = {
   id: 'brandLabels',
   afterDraw(chart) {
@@ -30,35 +30,35 @@ const brandLabelPlugin = {
 
     const pad = 5;
     const h = 17;
+    const minGap = 6; // 라벨 간 최소 수평 간격
 
-    // x 기준 정렬 후 수직 충돌 방지
+    // 모든 라벨을 같은 y줄에: P1의 y에서 22px 위
+    const ly = Math.max(Math.min(...labels.map(l => l.y)) - 22, 10);
+
+    // x 기준 정렬 후 겹치면 오른쪽으로 밀어서 1줄 유지
     const sorted = [...labels].sort((a, b) => a.x - b.x);
     const placed = [];
 
     sorted.forEach(lbl => {
-      let ly = lbl.y - 22; // 데이터 포인트 22px 위
-      // 이미 배치된 라벨과 겹치면 위로 올림
+      let lx = lbl.x;
       for (const p of placed) {
-        const horizOverlap = Math.abs(p.x - lbl.x) < (lbl.tw / 2 + p.tw / 2 + pad * 2 + 6);
-        if (horizOverlap && Math.abs(p.ly - ly) < h + 2) {
-          ly = Math.min(p.ly, ly) - (h + 4);
-        }
+        const minDist = p.tw / 2 + lbl.tw / 2 + pad * 2 + minGap;
+        if (lx - p.lx < minDist) lx = p.lx + minDist;
       }
-      ly = Math.max(ly, 10);
-      placed.push({ x: lbl.x, ly, label: lbl.label, color: lbl.color, tw: lbl.tw });
+      placed.push({ lx, ly, label: lbl.label, color: lbl.color, tw: lbl.tw });
     });
 
-    // 라벨 렌더링: 각 브랜드의 P1 점수 위치 바로 위
-    placed.forEach(({ x, ly, label, color, tw }) => {
+    // 라벨 렌더링 (모두 같은 y)
+    placed.forEach(({ lx, ly, label, color, tw }) => {
       ctx.fillStyle = 'rgba(255,255,255,0.97)';
-      ctx.fillRect(x - tw / 2 - pad, ly - h + 3, tw + pad * 2, h);
+      ctx.fillRect(lx - tw / 2 - pad, ly - h + 3, tw + pad * 2, h);
       ctx.strokeStyle = color;
       ctx.lineWidth = 1.5;
-      ctx.strokeRect(x - tw / 2 - pad, ly - h + 3, tw + pad * 2, h);
+      ctx.strokeRect(lx - tw / 2 - pad, ly - h + 3, tw + pad * 2, h);
       ctx.fillStyle = color;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
-      ctx.fillText(label, x, ly);
+      ctx.fillText(label, lx, ly);
     });
 
     ctx.restore();
