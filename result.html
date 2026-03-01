@@ -128,6 +128,9 @@
   <main class="page-main" style="flex:1;">
     <div class="container">
 
+      <!-- 인쇄 전용 레이어 (JS가 빌드, 화면에서는 숨김) -->
+      <div id="geo-print-layer"></div>
+
       <!-- 에러 상태 (hidden by default) -->
       <div id="error-section" style="display:none;">
         <div class="error-state">
@@ -251,55 +254,21 @@
   </footer>
 
   <style>
-    /* 인쇄 전용 헤더 — 화면에서는 숨김 */
+    /* 인쇄 전용 헤더 / Print Layer — 화면에서는 숨김 */
     .print-title-bar { display: none; }
+    #geo-print-layer { display: none; }
 
     @media print {
-      /* CSS 변수 재정의 (print 컨텍스트에서 확실하게 해석) */
-      :root {
-        --text-primary: #111111;
-        --text-secondary: #444444;
-        --text-muted: #666666;
-        --bg-card: #f8f8f8;
-        --bg-primary: #ffffff;
-        --border-subtle: #e5e5e5;
-        --border-card: #e0e0e0;
-        --red-accent: #e74c3c;
-        --green-cta: #2ecc71;
-        --blue-info: #3498db;
-        --yellow-warn: #f39c12;
-        --brand-a: #e74c3c;
-        --brand-b: #3498db;
-        --brand-c: #2ecc71;
-        --spacing-xl: 40px;
-        --radius-lg: 12px;
-        --radius-sm: 6px;
-      }
-
       * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
 
-      /* 인쇄 전용 제목 표시 */
-      .print-title-bar {
-        display: flex !important;
-        justify-content: space-between;
-        align-items: baseline;
-        padding: 12px 0 8px;
-        border-bottom: 2px solid #222;
-        margin-bottom: 16px;
-        font-size: 1rem;
-        color: #111111;
-      }
-      .print-title-bar strong { font-size: 1.25rem; font-weight: 800; }
-      .print-title-bar span { font-size: 0.8rem; color: #555; }
-
-      /* 기존 헤더/UI 완전 숨김 */
+      /* ① 기존 UI 전부 숨김 — 탭, 헤더, 차트 canvas 등 */
       .page-header, .ai-engine-banner, .tab-nav, .action-bar,
-      .site-footer, #score-tooltip { display: none !important; }
+      .site-footer, #score-tooltip, #result-section { display: none !important; }
 
-      /* body/layout 리셋 */
+      /* ② body / layout 리셋 */
       html, body {
         display: block !important;
         min-height: 0 !important;
@@ -307,61 +276,53 @@
         background: #ffffff !important;
         color: #111111 !important;
       }
-      .page-main {
-        display: block !important;
-        flex: none !important;
-        height: auto !important;
-        min-height: 0 !important;
-        background: #ffffff !important;
-        padding: 0 !important;
-      }
-      #result-section {
-        height: auto !important;
-        min-height: 0 !important;
-      }
-      .container { padding: 0 24px !important; }
+      .page-main { display: block !important; flex: none !important; padding: 0 !important; }
+      .container  { padding: 0 24px !important; }
 
-      /* 탭: 비교 + 개선만 표시 */
-      .tab-panel { display: none !important; }
-      #tab-compare { display: block !important; }
-      #tab-verify  { display: none !important; }
-      #tab-improve {
-        display: block !important;
-        break-before: page;
-        height: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
+      /* ③ Print Layer만 출력 */
+      #geo-print-layer { display: block !important; }
+
+      /* Print Layer 내부 공통 */
+      #geo-print-layer .print-title-bar {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 12px 0 8px;
+        border-bottom: 2px solid #222;
+        margin-bottom: 20px;
+        font-size: 1rem;
+        color: #111;
       }
-      #improve-content {
+      #geo-print-layer .print-title-bar strong { font-size: 1.25rem; font-weight: 800; }
+      #geo-print-layer .print-title-bar span   { font-size: 0.8rem; color: #555; }
+
+      /* 차트 이미지 */
+      #geo-print-layer .print-chart-img {
+        display: block !important;
+        width: 100% !important;
         height: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
       }
 
       /* 점수 카드 */
-      .score-cards {
+      #geo-print-layer .score-cards {
         display: grid !important;
         grid-template-columns: repeat(3, 1fr) !important;
         gap: 12px !important;
         break-inside: avoid;
       }
-      .score-card {
+      #geo-print-layer .score-card {
         background: #f8f8f8 !important;
         border: 1px solid #e0e0e0 !important;
         color: #111111 !important;
       }
 
-      /* 차트: canvas 숨기고 JS가 삽입한 img만 표시 */
-      .chart-wrapper { display: block !important; }
-      .chart-wrapper canvas { display: none !important; }
-      #chart-print-img { display: block !important; width: 100% !important; height: auto !important; }
-
       /* 테이블 */
-      .pillar-table th,
-      .pillar-table td { color: #333333 !important; }
+      #geo-print-layer .pillar-table th,
+      #geo-print-layer .pillar-table td { color: #333333 !important; }
 
-      /* 개선 카드 */
-      .improvement-card { break-inside: avoid; }
+      /* 2페이지 이후 (개선 방향) */
+      #geo-print-layer .print-page-2 { break-before: page; }
+      #geo-print-layer .improvement-card { break-inside: avoid; }
     }
   </style>
 

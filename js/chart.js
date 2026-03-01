@@ -36,24 +36,32 @@ const brandLabelPlugin = {
     // 각 라벨 텍스트 너비 측정
     points.forEach(pt => { pt.tw = ctx.measureText(pt.label).width; });
 
-    // x 기준 정렬 (좌→우)
-    points.sort((a, b) => a.x - b.x);
-
-    // 배치 결정: 겹치는 라벨은 위로 이동하며 재배치
-    const placed = [];
+    // x 기준 그룹핑: 10px 이내 = 같은 x 위치로 간주 → 수평 1열 배치
+    const groups = [];
     points.forEach(pt => {
-      let ly = pt.y - 22;
-      for (let attempt = 0; attempt < 8; attempt++) {
-        const testY = Math.max(pt.y - 22 - attempt * 22, 12);
-        const clash = placed.some(prev => {
-          const xClose = Math.abs(prev.lx - pt.x) < (prev.tw + pt.tw) / 2 + 10;
-          const yClose = Math.abs(prev.ly - testY) < 18;
-          return xClose && yClose;
-        });
-        if (!clash) { ly = testY; break; }
-        ly = testY;
+      const g = groups.find(g => Math.abs(g.cx - pt.x) < 10);
+      if (g) {
+        g.items.push(pt);
+        g.cx = g.items.reduce((s, p) => s + p.x, 0) / g.items.length;
+      } else {
+        groups.push({ cx: pt.x, cy: pt.y, items: [pt] });
       }
-      placed.push({ lx: pt.x, ly, label: pt.label, color: pt.color, tw: pt.tw });
+    });
+
+    // 그룹별 배치: 같은 그룹은 수평으로 펼침, 다른 그룹은 y를 올려 충돌 회피
+    const GAP = 8; // 라벨 간 수평 간격
+    const placed = [];
+    groups.forEach(group => {
+      const widths  = group.items.map(p => p.tw);
+      const totalW  = widths.reduce((s, w) => s + w, 0) + GAP * (group.items.length - 1);
+      const baseY   = Math.max(group.cy - 22, 12);
+      let   startX  = group.cx - totalW / 2;
+
+      group.items.forEach((pt, i) => {
+        const lx = startX + widths[i] / 2;
+        placed.push({ lx, ly: baseY, label: pt.label, color: pt.color, tw: pt.tw });
+        startX += widths[i] + GAP;
+      });
     });
 
     // 라벨 렌더링
