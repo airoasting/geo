@@ -119,6 +119,16 @@
     /* 로딩 상태 오버레이 */
     #loading-overlay {
       display: none;
+      min-height: 70vh;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    #loading-overlay.is-active {
+      display: flex;
+    }
+    #loading-overlay .loading-state {
+      padding: 0;
     }
 
     /* API Key 모달 내부 */
@@ -723,7 +733,7 @@
       // 로딩 UI 표시
       document.getElementById('form-section').style.display = 'none';
       const loadingEl = document.getElementById('loading-overlay');
-      loadingEl.style.display = 'block';
+      loadingEl.classList.add('is-active');
 
       const statusContainer = document.getElementById('brand-statuses');
       statusContainer.innerHTML = brands.map((brand, i) => `
@@ -750,7 +760,7 @@
       if (successResults.length === 0) {
         alert('모든 브랜드 분석에 실패했습니다. API Key와 네트워크 연결을 확인해주세요.');
         document.getElementById('form-section').style.display = 'block';
-        loadingEl.style.display = 'none';
+        loadingEl.classList.remove('is-active');
         return;
       }
 
