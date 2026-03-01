@@ -6,7 +6,7 @@ import { parseApiResponse } from './fallback.js';
 
 // Cloudflare Worker 프록시 URL (배포 후 여기에 실제 URL 입력)
 // 예: 'https://geo-proxy.YOUR-ACCOUNT.workers.dev'
-export const PROXY_URL = 'https://geo-proxy.YOUR-ACCOUNT.workers.dev';
+export const PROXY_URL = 'https://9872.jaydenjkang.workers.dev';
 
 const TIMEOUT_MS = 90000; // 90초
 const MODEL = 'claude-sonnet-4-6';
