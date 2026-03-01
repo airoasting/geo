@@ -25,7 +25,7 @@ export async function exportResultToPDF(result) {
 
   // html2canvas 캡처
   const canvas = await html2canvas(element, {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#ffffff',
     scale: 2,
     useCORS: true,
     logging: false,

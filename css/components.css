@@ -632,7 +632,7 @@
   left: 50%;
   transform: translateX(-50%);
   background: #333;
-  color: var(--text-secondary);
+  color: #ffffff;
   font-size: 0.75rem;
   font-weight: 400;
   padding: 6px 10px;
