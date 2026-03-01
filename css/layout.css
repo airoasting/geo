@@ -224,6 +224,52 @@
   opacity: 1;
 }
 
+/* ===== 뉴스레터 배너 ===== */
+.newsletter-bar {
+  background: #2d2d2d;
+  border-top: 1px solid #3a3a3a;
+  border-bottom: 1px solid #3a3a3a;
+  padding: 18px 0;
+}
+
+.newsletter-bar .container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.newsletter-bar__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #cccccc;
+  white-space: nowrap;
+}
+
+.newsletter-bar__desc {
+  font-size: 0.8125rem;
+  color: #888888;
+}
+
+.newsletter-bar__btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  background: var(--green-cta);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.newsletter-bar__btn:hover {
+  background: var(--green-dark);
+  color: white;
+}
+
 /* ===== 반응형 ===== */
 @media (max-width: 900px) {
   .three-card-grid {
