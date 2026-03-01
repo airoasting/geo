@@ -7,23 +7,38 @@ import { PILLAR_LABELS, PILLAR_KEYS } from './pillars-data.js';
 // 차트 인스턴스 캐시 (재렌더 방지)
 const chartInstances = {};
 
-// 브랜드 이름을 P1 점수 위치 기준 1줄로 배치하는 커스텀 플러그인
+// 브랜드 이름을 ① 수집 접근성 점 바로 위에 1줄로 배치하는 커스텀 플러그인
 const brandLabelPlugin = {
   id: 'brandLabels',
   afterDraw(chart) {
     const ctx = chart.ctx;
     const xScale = chart.scales.x;
-    const yScale = chart.scales.y;
-    if (!xScale || !yScale) return;
+    if (!xScale) return;
 
-    // y: 첫 번째 pillar(①) 행의 픽셀 y, 22px 위
-    const firstRowY = yScale.getPixelForValue(0);
-    const ly = Math.max(firstRowY - 22, 10);
+    // ① 수집 접근성 행의 실제 y: 첫 번째 데이터셋 meta.data[0].y 사용
+    // (yScale.getPixelForValue(0)은 chart 구성에 따라 부정확)
+    let firstRowY = null;
+    for (let i = 0; i < chart.data.datasets.length; i++) {
+      const meta = chart.getDatasetMeta(i);
+      if (meta && meta.data && meta.data[0]) {
+        const dp = meta.data[0];
+        if (typeof dp.y === 'number' && !isNaN(dp.y)) {
+          firstRowY = dp.y;
+          break;
+        }
+      }
+    }
+    if (firstRowY === null) return;
+
+    // 점(pointRadius=7) 바로 위 4px 간격에 라벨 하단 위치
+    const POINT_R = 7, GAP = 4, LH = 17;
+    // ly = 텍스트 baseline (박스 하단 기준 -3px offset)
+    const ly = Math.max(firstRowY - POINT_R - GAP - 3, 10);
 
     ctx.save();
     ctx.font = 'bold 12px system-ui, -apple-system, sans-serif';
 
-    // 각 dataset의 P1 점수값 → x 픽셀 변환
+    // 각 dataset의 P1 점수값 → x 픽셀
     const labels = chart.data.datasets.map((dataset, i) => {
       const meta = chart.getDatasetMeta(i);
       if (!meta.visible) return null;
@@ -36,7 +51,7 @@ const brandLabelPlugin = {
 
     if (!labels.length) { ctx.restore(); return; }
 
-    const pad = 5, h = 17, minGap = 6;
+    const pad = 5, minGap = 6;
 
     // x 기준 정렬 → 겹치면 오른쪽으로 밀어서 1줄 유지
     const sorted = [...labels].sort((a, b) => a.x - b.x);
@@ -53,10 +68,10 @@ const brandLabelPlugin = {
     // 렌더링
     placed.forEach(({ lx, label, color, tw }) => {
       ctx.fillStyle = 'rgba(255,255,255,0.97)';
-      ctx.fillRect(lx - tw / 2 - pad, ly - h + 3, tw + pad * 2, h);
+      ctx.fillRect(lx - tw / 2 - pad, ly - LH + 3, tw + pad * 2, LH);
       ctx.strokeStyle = color;
       ctx.lineWidth = 1.5;
-      ctx.strokeRect(lx - tw / 2 - pad, ly - h + 3, tw + pad * 2, h);
+      ctx.strokeRect(lx - tw / 2 - pad, ly - LH + 3, tw + pad * 2, LH);
       ctx.fillStyle = color;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
@@ -154,7 +169,7 @@ function _renderChart(canvasId, brands, isDemo, originalBrands) {
       responsive: true,
       maintainAspectRatio: false,
       layout: {
-        padding: { right: 80, top: 56, left: 4, bottom: 4 }
+        padding: { right: 80, top: 42, left: 4, bottom: 4 }
       },
       plugins: {
         legend: {
