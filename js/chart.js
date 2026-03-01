@@ -145,7 +145,7 @@ function _renderChart(canvasId, brands, isDemo, originalBrands) {
       responsive: true,
       maintainAspectRatio: false,
       layout: {
-        padding: { right: 28, top: 36, left: 4, bottom: 4 }
+        padding: { right: 28, top: 56, left: 4, bottom: 4 }
       },
       plugins: {
         legend: {
