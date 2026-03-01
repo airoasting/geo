@@ -116,19 +116,18 @@
       margin-top: 1px;
     }
 
-    /* 로딩 상태 오버레이 */
-    #loading-overlay {
-      display: none;
-      min-height: 30vh;
+    /* 로딩 상태 오버레이 — 전체 화면 중앙 고정 */
+    #loading-overlay { display: none; }
+    #loading-overlay.is-active {
+      display: flex;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: #ffffff;
       align-items: center;
       justify-content: center;
     }
-    #loading-overlay.is-active {
-      display: flex;
-    }
-    #loading-overlay .loading-state {
-      padding: 0;
-    }
+    #loading-overlay .loading-state { padding: 0; }
 
     /* API Key 모달 내부 */
     .api-steps {
