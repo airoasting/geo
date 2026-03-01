@@ -351,8 +351,10 @@
         color: #111111 !important;
       }
 
-      /* 차트 canvas는 print 불가 → 숨김 */
-      .chart-wrapper { display: none !important; }
+      /* 차트: canvas 숨기고 JS가 삽입한 img만 표시 */
+      .chart-wrapper { display: block !important; }
+      .chart-wrapper canvas { display: none !important; }
+      #chart-print-img { display: block !important; width: 100% !important; height: auto !important; }
 
       /* 테이블 */
       .pillar-table th,

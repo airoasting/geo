@@ -27,6 +27,17 @@ export async function exportResultToPDF(result) {
     void improveTab.offsetHeight; // 동기 리플로우 강제 유발
   }
 
+  // 차트 canvas → <img> 변환 (canvas는 인쇄 불가)
+  const chartCanvas = document.getElementById('result-chart');
+  let chartImg = null;
+  if (chartCanvas) {
+    chartImg = document.createElement('img');
+    chartImg.id = 'chart-print-img';
+    chartImg.src = chartCanvas.toDataURL('image/png');
+    chartImg.style.cssText = 'width:100%;height:auto;display:block;';
+    chartCanvas.parentNode.insertBefore(chartImg, chartCanvas);
+  }
+
   // rAF 2프레임 + 400ms 대기 (Chrome 레이아웃 완료 보장)
   await new Promise(resolve =>
     requestAnimationFrame(() =>
@@ -36,7 +47,8 @@ export async function exportResultToPDF(result) {
 
   window.print();
 
-  // 인쇄 후 개선 탭 원상복귀
+  // 인쇄 후 원상복귀
+  if (chartImg) chartImg.remove();
   if (improveTab) {
     improveTab.style.display = '';
     improveTab.style.height = '';
