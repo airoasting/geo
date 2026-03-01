@@ -103,6 +103,28 @@
       box-shadow: 0 6px 20px rgba(231, 76, 60, 0.35);
     }
 
+    .hero__badges {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 14px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 100px;
+      font-size: 0.8125rem;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.01em;
+    }
+
     /* 뉴스레터 배너 */
     .newsletter-bar {
       background: #2d2d2d;
@@ -344,6 +366,33 @@
       font-weight: 700;
     }
 
+    /* 진단하기 카드 강조 */
+    .nav-card--featured {
+      border-color: var(--red-accent);
+      background: rgba(231, 76, 60, 0.04);
+      position: relative;
+    }
+
+    .nav-card--featured:hover {
+      background: rgba(231, 76, 60, 0.08);
+      box-shadow: 0 6px 24px rgba(231, 76, 60, 0.18);
+    }
+
+    .nav-card__featured-tag {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--red-accent);
+      color: white;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: 100px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
     @media (max-width: 900px) {
       .hero__title { font-size: 2.25rem; }
       .pillars-grid { grid-template-columns: repeat(4, 1fr); }
@@ -362,28 +411,24 @@
     <div class="container">
       <p class="hero__tag">AI Roasting</p>
       <h1 class="hero__title">내 브랜드,<br>AI가 추천해줄까?</h1>
-      <p class="hero__sub">브랜드를 입력하면 AI가 7가지 기준으로 평가합니다</p>
+        <p class="hero__sub">ChatGPT·Claude 같은 AI가 브랜드를 추천하는 시대.<br>당신의 브랜드는 AI에게 얼마나 잘 알려져 있나요?</p>
       <a href="diagnose.html" class="hero__cta">
-        🔍 무료로 진단하기 →
+        🔍 지금 바로 진단하기 →
       </a>
+      <div class="hero__badges">
+        <span class="hero__badge">🤖 Claude AI 기반 분석</span>
+        <span class="hero__badge">⚡ 약 20초 소요</span>
+        <span class="hero__badge">🔒 데이터 외부 전송 없음</span>
+      </div>
     </div>
   </section>
-
-  <!-- 뉴스레터 배너 -->
-  <div class="newsletter-bar">
-    <div class="container">
-      <span class="newsletter-bar__label">🔥 AI Roasting 뉴스레터</span>
-      <span class="newsletter-bar__desc">주간 AI 소식</span>
-      <a href="https://www.linkedin.com/newsletters/ai-%EB%A1%9C%EC%8A%A4%ED%8C%85-7321517076899127296/" class="newsletter-bar__btn" target="_blank" rel="noopener noreferrer">구독하기 →</a>
-    </div>
-  </div>
 
   <!-- 메인 카드 섹션 -->
   <section class="cards-section">
     <div class="container">
       <div class="cards-section__header">
-        <h2 class="cards-section__title">무엇을 하시겠어요?</h2>
-        <p class="cards-section__sub">프레임워크를 이해하고, 브랜드를 진단하고, 결과를 관리하세요</p>
+        <h2 class="cards-section__title">시작하기</h2>
+        <p class="cards-section__sub">GEO 프레임워크를 이해하고, 브랜드를 진단하고, 결과를 관리하세요</p>
       </div>
 
       <div class="three-card-grid">
@@ -393,7 +438,8 @@
           <span class="nav-card__desc">AI가 브랜드를 평가하는 7가지 기준이 무엇인지 알아보세요</span>
         </a>
 
-        <a href="diagnose.html" class="nav-card">
+        <a href="diagnose.html" class="nav-card nav-card--featured">
+          <span class="nav-card__featured-tag">추천</span>
           <span class="nav-card__icon">🔍</span>
           <span class="nav-card__title">브랜드 진단하기</span>
           <span class="nav-card__desc">3개 브랜드를 동시에 분석하고 AI 추천 가능성을 점수로 확인하세요</span>
@@ -407,6 +453,15 @@
       </div>
     </div>
   </section>
+
+  <!-- 뉴스레터 배너 (카드 섹션 이후로 이동) -->
+  <div class="newsletter-bar">
+    <div class="container">
+      <span class="newsletter-bar__label">🔥 AI Roasting 뉴스레터</span>
+      <span class="newsletter-bar__desc">주간 AI 트렌드 & GEO 인사이트</span>
+      <a href="https://www.linkedin.com/newsletters/ai-%EB%A1%9C%EC%8A%A4%ED%8C%85-7321517076899127296/" class="newsletter-bar__btn" target="_blank" rel="noopener noreferrer">구독하기 →</a>
+    </div>
+  </div>
 
   <!-- 7-Pillar 미리보기 -->
   <div class="pillars-preview">

@@ -401,9 +401,10 @@
 
       <div class="api-steps">
         <ol>
-          <li><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> 에 접속</li>
-          <li>Settings → API Keys → Create Key</li>
-          <li>생성된 Key를 아래에 붙여넣기</li>
+          <li><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> 접속 → 회원가입 또는 로그인</li>
+          <li>좌측 메뉴 <strong>Settings → API Keys</strong> 클릭</li>
+          <li><strong>Create Key</strong> 버튼 클릭 → Key 이름 입력 후 생성</li>
+          <li>생성된 키(<code style="font-size:0.75rem;background:#3a3a3a;padding:1px 6px;border-radius:4px;color:#ccc;">sk-ant-api03-...</code>)를 복사하여 아래에 붙여넣기</li>
         </ol>
       </div>
 
@@ -427,7 +428,8 @@
       </label>
 
       <div class="info-box info-box--warning" style="font-size:0.8125rem;">
-        ⚠️ API 사용 비용은 본인 계정에서 청구됩니다. 한 번의 진단에 약 3,000~5,000 토큰이 소요됩니다.
+        ⚠️ API 사용 비용은 본인 Anthropic 계정에서 청구됩니다.<br>
+        한 번의 진단 예상 비용: 약 <strong>$0.01~0.03</strong> (원화 15~45원 수준, 브랜드·응답 길이에 따라 다름)
       </div>
 
       <div id="api-test-status" style="font-size:0.8125rem;min-height:20px;margin-bottom:12px;"></div>
@@ -457,7 +459,10 @@
       <a href="index.html" class="page-header__back">← 목록으로</a>
       <h1 class="page-header__title">브랜드 진단하기</h1>
       <p class="page-header__sub">3개 브랜드를 동시에 GEO 7-Pillar 기준으로 분석합니다</p>
-      <span class="page-header__badge">Claude AI · 웹 검색 포함</span>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span class="page-header__badge">Claude AI · 웹 검색 포함</span>
+        <a href="framework.html#sample" style="font-size:0.8125rem;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.2);padding:4px 14px;border-radius:100px;text-decoration:none;transition:all 150ms;" onmouseover="this.style.color='rgba(255,255,255,0.85)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">📊 샘플 결과 먼저 보기 →</a>
+      </div>
     </div>
   </header>
 
@@ -668,15 +673,19 @@
               <div class="step-list">
                 <div class="step-item">
                   <span style="color:var(--green-cta);font-weight:700;flex-shrink:0;">✓</span>
-                  <span>같은 산업군의 경쟁 브랜드를 비교하세요</span>
+                  <span>같은 산업군의 <strong>직접 경쟁</strong> 브랜드를 입력하면 결과가 가장 유용합니다</span>
                 </div>
                 <div class="step-item">
                   <span style="color:var(--green-cta);font-weight:700;flex-shrink:0;">✓</span>
-                  <span>정확한 브랜드명을 입력하세요 (영어 또는 한국어)</span>
+                  <span>정확한 브랜드명 입력 (예: "스타벅스 코리아" 아닌 "스타벅스")</span>
+                </div>
+                <div class="step-item">
+                  <span style="color:var(--green-cta);font-weight:700;flex-shrink:0;">✓</span>
+                  <span>자사 브랜드 + 경쟁사 2개 조합을 추천합니다</span>
                 </div>
                 <div class="step-item">
                   <span style="color:var(--yellow-warn);font-weight:700;flex-shrink:0;">!</span>
-                  <span>소규모 브랜드는 정보 부족으로 정확도가 낮을 수 있습니다</span>
+                  <span>온라인 정보가 거의 없는 소규모 로컬 브랜드는 정확도가 낮을 수 있습니다</span>
                 </div>
               </div>
             </div>
@@ -685,6 +694,13 @@
               <div class="sidebar-card__title">📖 프레임워크 이해하기</div>
               <p style="font-size:0.8125rem;color:var(--text-muted);">
                 GEO 7-Pillar가 무엇인지, 각 기준이 어떻게 평가되는지 알아보세요
+              </p>
+            </a>
+
+            <a href="framework.html#sample" class="sidebar-card" style="text-decoration:none;color:inherit;display:block;border-color:var(--red-accent);background:rgba(231,76,60,0.04);">
+              <div class="sidebar-card__title" style="color:var(--red-accent);">📊 샘플 결과 미리보기</div>
+              <p style="font-size:0.8125rem;color:var(--text-muted);">
+                API Key 없이 실제 진단 결과가 어떻게 생겼는지 먼저 확인하세요
               </p>
             </a>
           </div>

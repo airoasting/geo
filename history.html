@@ -108,10 +108,13 @@
 
       <!-- 스토리지 배너 -->
       <div class="storage-banner">
-        <span class="storage-banner__text">💾 진단 결과는 이 브라우저의 localStorage에만 저장됩니다</span>
+        <div>
+          <span class="storage-banner__text">💾 결과는 <strong>이 브라우저·이 기기</strong>에만 저장됩니다</span>
+          <span style="font-size:0.75rem;color:var(--text-dim);margin-left:8px;">다른 기기에서 보려면 JSON으로 내보내 가져오기 하세요</span>
+        </div>
         <div class="storage-banner__actions">
-          <button class="btn btn--secondary btn--sm" onclick="exportJSON()">⬇ JSON 내보내기</button>
-          <button class="btn btn--secondary btn--sm" onclick="triggerImport()">⬆ JSON 가져오기</button>
+          <button class="btn btn--secondary btn--sm" onclick="exportJSON()" title="결과 데이터를 JSON 파일로 저장합니다">⬇ 백업 (JSON)</button>
+          <button class="btn btn--secondary btn--sm" onclick="triggerImport()" title="이전에 내보낸 JSON 파일을 불러옵니다">⬆ 복원 (JSON)</button>
           <input type="file" id="import-file-input" accept=".json" onchange="handleImport(event)">
         </div>
       </div>
@@ -120,13 +123,13 @@
       <div class="toolbar">
         <div class="toolbar__left">
           <span class="toolbar__count" id="result-count">0개 결과</span>
-          <select class="form-select" id="sort-select" style="width:auto;padding:6px 36px 6px 10px;" onchange="renderHistory()">
+          <select class="form-select" id="sort-select" style="width:140px;padding:6px 36px 6px 10px;" onchange="renderHistory()">
             <option value="newest">최신순</option>
             <option value="grade">등급순</option>
           </select>
         </div>
-        <button class="btn btn--danger btn--sm" onclick="confirmDeleteAll()">
-          모두 삭제
+        <button class="btn btn--secondary btn--sm" onclick="confirmDeleteAll()" style="border-color:var(--red-accent);color:var(--red-accent);" title="저장된 모든 진단 결과를 삭제합니다 (복구 불가)">
+          🗑 전체 삭제
         </button>
       </div>
 

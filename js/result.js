@@ -264,7 +264,7 @@ window.switchTab = function(tabId, btn) {
   document.getElementById(tabId).classList.add('active');
 
   const pdfBtn = document.getElementById('pdf-btn');
-  if (pdfBtn) pdfBtn.style.display = tabId === 'tab-compare' ? '' : 'none';
+  if (pdfBtn) pdfBtn.style.display = (tabId === 'tab-compare' || tabId === 'tab-improve') ? '' : 'none';
 };
 
 /**

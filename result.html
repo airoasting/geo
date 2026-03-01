@@ -157,13 +157,32 @@
 
         <!-- 탭 네비게이션 -->
         <nav class="tab-nav">
-          <button class="tab-btn active" data-tab="tab-compare" onclick="switchTab('tab-compare', this)">비교</button>
-          <button class="tab-btn" data-tab="tab-improve" onclick="switchTab('tab-improve', this)">개선 방향</button>
+          <button class="tab-btn active" data-tab="tab-improve" onclick="switchTab('tab-improve', this)">개선 방향</button>
+          <button class="tab-btn" data-tab="tab-compare" onclick="switchTab('tab-compare', this)">점수 비교</button>
           <button class="tab-btn" data-tab="tab-verify" onclick="switchTab('tab-verify', this)">추가 검증</button>
         </nav>
 
-        <!-- ===== 탭 1: 비교 ===== -->
-        <div class="tab-panel active" id="tab-compare">
+        <!-- ===== 탭 1: 개선 방향 (첫 번째로 이동) ===== -->
+        <div class="tab-panel active" id="tab-improve">
+          <div id="improve-content">
+            <!-- JS로 렌더링 -->
+          </div>
+        </div>
+
+        <!-- ===== 탭 2: 비교 ===== -->
+        <div class="tab-panel" id="tab-compare">
+
+          <!-- 점수 카드 용어 설명 -->
+          <div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:0.8125rem;font-weight:700;color:var(--text-secondary);">GEO 평균점수</span>
+              <span style="font-size:0.75rem;color:var(--text-dim);background:var(--bg-card);border:1px solid var(--border-subtle);padding:2px 8px;border-radius:100px;">7개 항목 평균 · 0~10점</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:0.8125rem;font-weight:700;color:var(--text-secondary);">ARS (AI 추천점수)</span>
+              <span style="font-size:0.75rem;color:var(--text-dim);background:var(--bg-card);border:1px solid var(--border-subtle);padding:2px 8px;border-radius:100px;">최소조건 위반 시 상한 적용 · 0~100점</span>
+            </div>
+          </div>
 
           <!-- 점수 카드 -->
           <div class="score-cards" id="score-cards">
@@ -184,17 +203,11 @@
           </div>
         </div>
 
-        <!-- ===== 탭 2: 개선 ===== -->
-        <div class="tab-panel" id="tab-improve">
-          <div id="improve-content">
-            <!-- JS로 렌더링 -->
-          </div>
-        </div>
-
         <!-- ===== 탭 3: 검증 ===== -->
         <div class="tab-panel" id="tab-verify">
           <div class="info-box info-box--warning" style="margin-bottom:20px;">
-            ⚠️ 맥락 검증은 추가 API 요청을 발생시킵니다. 결과는 Claude 기준이며 다른 AI와 다를 수 있습니다.
+            ⚠️ 맥락 검증은 추가 API 요청을 발생시킵니다 (예상 비용: 약 $0.005~0.01 / 쿼리 3개 기준).<br>
+            실제 사용자가 AI에게 어떤 검색어로 물어봤을 때 각 브랜드가 언급되는지를 시뮬레이션합니다.
           </div>
 
           <h3 style="font-size:1rem;margin-bottom:16px;color:var(--text-secondary);">테스트 검색 쿼리 입력</h3>
@@ -234,10 +247,17 @@
             <a href="history.html" class="btn btn--secondary">📊 히스토리</a>
           </div>
           <div class="action-bar__right">
+            <button class="btn btn--secondary" id="share-btn" onclick="shareResult()" title="결과를 텍스트로 클립보드에 복사합니다">
+              🔗 결과 공유
+            </button>
             <button class="btn btn--primary" id="pdf-btn" onclick="exportPDF()">
               📄 PDF 내보내기
             </button>
           </div>
+        </div>
+        <!-- 공유 완료 토스트 -->
+        <div id="share-toast" style="display:none;position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#222;color:#fff;font-size:0.875rem;padding:10px 20px;border-radius:100px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+          ✅ 결과가 클립보드에 복사됐습니다
         </div>
 
       </div><!-- /result-section -->
@@ -327,6 +347,46 @@
   </style>
 
   <script type="module" src="js/result.js"></script>
+
+  <script>
+    // 결과 공유 기능 (텍스트 요약을 클립보드에 복사)
+    window.shareResult = async function() {
+      try {
+        // result.js가 렌더링한 점수카드에서 텍스트 추출
+        const scoreCards = document.querySelectorAll('#score-cards .score-card');
+        if (!scoreCards.length) {
+          alert('결과가 로딩되지 않았습니다. 잠시 후 다시 시도해주세요.');
+          return;
+        }
+        const headerSub = document.getElementById('header-sub');
+        const headerBadge = document.getElementById('header-badge');
+        let text = 'GEO 7-Pillar 브랜드 진단 결과\n';
+        text += '━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+        if (headerSub) text += headerSub.textContent.trim() + '\n';
+        if (headerBadge) text += headerBadge.textContent.trim() + '\n\n';
+        scoreCards.forEach(card => {
+          const brand = card.querySelector('.score-card__brand');
+          const geo = card.querySelector('.score-card__geo-value');
+          const ars = card.querySelector('.score-card__ars-value');
+          const grade = card.querySelector('.grade-badge');
+          if (brand) text += `◆ ${brand.textContent.trim()}\n`;
+          if (geo) text += `  GEO 평균점수: ${geo.textContent.trim()} / 10\n`;
+          if (ars) text += `  AI 추천점수(ARS): ${ars.textContent.trim()} / 100`;
+          if (grade) text += ` (${grade.textContent.trim()}등급)`;
+          text += '\n\n';
+        });
+        text += '━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+        text += '분석 엔진: Claude AI (Anthropic) | GEO 7-Pillar Framework\n';
+        text += `진단 일시: ${new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric'})}`;
+        await navigator.clipboard.writeText(text);
+        const toast = document.getElementById('share-toast');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+      } catch(e) {
+        alert('복사에 실패했습니다. 브라우저가 클립보드 접근을 허용하는지 확인해주세요.');
+      }
+    };
+  </script>
 
   <!-- 점수 셀 툴팁 -->
   <div id="score-tooltip"></div>

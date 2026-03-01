@@ -38,9 +38,12 @@ function renderHistory() {
     grid.innerHTML = `
       <div class="empty-state" style="grid-column:1/-1;">
         <div class="empty-state__icon">📊</div>
-        <h2 class="empty-state__title">진단 기록이 없습니다</h2>
-        <p class="empty-state__desc">아직 브랜드를 진단하지 않았습니다.<br>지금 바로 시작해보세요!</p>
-        <a href="diagnose.html" class="btn btn--primary">🔍 진단하러 가기</a>
+        <h2 class="empty-state__title">아직 진단 기록이 없습니다</h2>
+        <p class="empty-state__desc">브랜드를 처음 진단하면 결과가 여기에 저장됩니다.<br>자사 브랜드 + 경쟁사 2개를 넣어 비교해보세요.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
+          <a href="diagnose.html" class="btn btn--primary">🔍 지금 진단하기</a>
+          <a href="framework.html#sample" class="btn btn--secondary">📊 샘플 결과 먼저 보기</a>
+        </div>
       </div>
     `;
     return;

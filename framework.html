@@ -253,6 +253,48 @@
       top: -2px;
     }
 
+    /* 자가진단 체크리스트 박스 */
+    .self-check-box {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: rgba(46, 204, 113, 0.06);
+      border: 1px solid rgba(46, 204, 113, 0.25);
+      border-radius: 8px;
+    }
+
+    .self-check-box__title {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--green-dark);
+      margin-bottom: 10px;
+    }
+
+    .self-check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      padding: 4px 0;
+      cursor: pointer;
+      line-height: 1.5;
+    }
+
+    .self-check-item input[type="checkbox"] {
+      flex-shrink: 0;
+      margin-top: 2px;
+      width: 14px;
+      height: 14px;
+      accent-color: var(--green-cta);
+      cursor: pointer;
+    }
+
+    .self-check-item:has(input:checked) {
+      color: var(--text-dim);
+      text-decoration: line-through;
+      text-decoration-color: var(--green-cta);
+    }
+
     /* Pillar 상세 내용 */
     .pillar-detail {
       display: grid;
@@ -534,6 +576,13 @@
                     <p class="pillar-detail__text">단순 검색 노출 여부가 아닌, AI 학습 및 실시간 검색 도구가 구조화된 정보에 접근 가능한지를 평가합니다.</p>
                   </div>
                 </div>
+                <div class="self-check-box">
+                  <div class="self-check-box__title">✅ 자가진단 체크리스트</div>
+                  <label class="self-check-item"><input type="checkbox"> robots.txt에서 GPTBot, ClaudeBot, Googlebot을 허용하고 있다</label>
+                  <label class="self-check-item"><input type="checkbox"> 공식 사이트에 JSON-LD 구조화 데이터가 적용되어 있다</label>
+                  <label class="self-check-item"><input type="checkbox"> 브랜드 Wikipedia 또는 나무위키 페이지가 존재한다</label>
+                  <label class="self-check-item"><input type="checkbox"> 공식 SNS(인스타그램, 링크드인 등) 계정이 정기적으로 운영 중이다</label>
+                </div>
               </div>
             </div>
           </div>
@@ -569,6 +618,13 @@
                     <div class="pillar-detail__heading" style="margin-top:12px;">경계</div>
                     <p class="pillar-detail__text">단순 언급 수가 아닌 출처의 권위성(도메인 신뢰도, 전문성)이 핵심 평가 기준입니다.</p>
                   </div>
+                </div>
+                <div class="self-check-box">
+                  <div class="self-check-box__title">✅ 자가진단 체크리스트</div>
+                  <label class="self-check-item"><input type="checkbox"> 최근 1년 내 주요 언론사에서 브랜드를 다룬 기사가 3건 이상 있다</label>
+                  <label class="self-check-item"><input type="checkbox"> 업계 전문 미디어 또는 전문가 블로그에서 브랜드가 언급된다</label>
+                  <label class="self-check-item"><input type="checkbox"> 정부·공공기관 수상, 인증, 공식 파트너십 실적이 있다</label>
+                  <label class="self-check-item"><input type="checkbox"> 외부 링크(백링크)가 신뢰할 수 있는 도메인에서 다수 들어온다</label>
                 </div>
               </div>
             </div>
@@ -606,6 +662,13 @@
                     <p class="pillar-detail__text">정보의 양보다 관련성과 구조화 정도가 더 중요합니다. 동일한 내용의 반복은 효과가 없습니다.</p>
                   </div>
                 </div>
+                <div class="self-check-box">
+                  <div class="self-check-box__title">✅ 자가진단 체크리스트</div>
+                  <label class="self-check-item"><input type="checkbox"> 공식 사이트에 창업 스토리, 브랜드 가치관이 명확히 서술되어 있다</label>
+                  <label class="self-check-item"><input type="checkbox"> 핵심 제품/서비스의 특징을 구체적으로 설명하는 콘텐츠가 있다</label>
+                  <label class="self-check-item"><input type="checkbox"> 실제 고객 리뷰 또는 사용 후기가 다수 존재한다 (네이버, 구글 등)</label>
+                  <label class="self-check-item"><input type="checkbox"> AI가 한 문단으로 우리 브랜드를 설명할 수 있을 만큼 정보가 충분하다</label>
+                </div>
               </div>
             </div>
           </div>
@@ -641,6 +704,13 @@
                     <div class="pillar-detail__heading" style="margin-top:12px;">경계</div>
                     <p class="pillar-detail__text">잦은 업데이트가 중요하지만, 일관성 없는 빈번한 변경은 오히려 혼란을 줄 수 있습니다.</p>
                   </div>
+                </div>
+                <div class="self-check-box">
+                  <div class="self-check-box__title">✅ 자가진단 체크리스트</div>
+                  <label class="self-check-item"><input type="checkbox"> 최근 6개월 내 언론 보도가 2건 이상 있다</label>
+                  <label class="self-check-item"><input type="checkbox"> 공식 SNS 또는 블로그가 월 2회 이상 업데이트된다</label>
+                  <label class="self-check-item"><input type="checkbox"> 최근 6개월 내 신제품 출시, 이벤트, 캠페인 등 활동이 있었다</label>
+                  <label class="self-check-item"><input type="checkbox"> 공식 웹사이트 콘텐츠가 최근 3개월 내 갱신됐다</label>
                 </div>
               </div>
             </div>
@@ -678,6 +748,13 @@
                     <p class="pillar-detail__text">완벽한 동일성이 아닌 핵심 메시지와 브랜드 가치의 일관성이 중요합니다.</p>
                   </div>
                 </div>
+                <div class="self-check-box">
+                  <div class="self-check-box__title">✅ 자가진단 체크리스트</div>
+                  <label class="self-check-item"><input type="checkbox"> 웹사이트, 인스타그램, 링크드인의 브랜드 소개 문구가 핵심 메시지를 공유한다</label>
+                  <label class="self-check-item"><input type="checkbox"> 외부 리뷰(네이버 플레이스, 구글 리뷰)와 공식 채널 메시지 사이에 모순이 없다</label>
+                  <label class="self-check-item"><input type="checkbox"> 2~3년 전 캠페인과 현재 캠페인의 브랜드 정체성이 일관된다</label>
+                  <label class="self-check-item"><input type="checkbox"> 영문/한국어 채널이 있다면 핵심 메시지가 동일하게 번역되어 있다</label>
+                </div>
               </div>
             </div>
           </div>
@@ -714,6 +791,13 @@
                     <p class="pillar-detail__text">타겟 세그먼트에서의 차별성이 전체 시장에서의 차별성보다 더 중요할 수 있습니다.</p>
                   </div>
                 </div>
+                <div class="self-check-box">
+                  <div class="self-check-box__title">✅ 자가진단 체크리스트</div>
+                  <label class="self-check-item"><input type="checkbox"> "우리는 [카테고리]에서 [이것]이 가장 뛰어나다"는 문장을 한 줄로 말할 수 있다</label>
+                  <label class="self-check-item"><input type="checkbox"> 경쟁사와 다른 USP가 공식 사이트 및 마케팅 자료에 명확히 드러난다</label>
+                  <label class="self-check-item"><input type="checkbox"> 수상, 특허, 공인 인증 등 객관적으로 증명할 수 있는 차별화 요소가 있다</label>
+                  <label class="self-check-item"><input type="checkbox"> 타겟 고객군이 명확하고 그들을 위한 전문화된 콘텐츠가 존재한다</label>
+                </div>
               </div>
             </div>
           </div>
@@ -749,6 +833,13 @@
                     <div class="pillar-detail__heading" style="margin-top:12px;">경계</div>
                     <p class="pillar-detail__text">과거의 이슈라도 해결된 경우와 진행 중인 경우를 구분하여 평가합니다. 해결된 이슈는 낮은 패널티를 적용합니다.</p>
                   </div>
+                </div>
+                <div class="self-check-box">
+                  <div class="self-check-box__title">✅ 자가진단 체크리스트</div>
+                  <label class="self-check-item"><input type="checkbox"> 최근 1년 내 언론에 부정적으로 보도된 논란이나 스캔들이 없다</label>
+                  <label class="self-check-item"><input type="checkbox"> 현재 진행 중인 소송, 공정위 조사, 규제 위반 이슈가 없다</label>
+                  <label class="self-check-item"><input type="checkbox"> 제품/서비스 안전성 관련 리콜, 피해 사례 보도가 없다</label>
+                  <label class="self-check-item"><input type="checkbox"> ESG(환경·사회·지배구조) 관련 심각한 부정 이슈가 없다</label>
                 </div>
               </div>
             </div>
@@ -914,7 +1005,7 @@
       <!-- 5. CTA -->
       <section class="section" style="text-align:center;padding:40px 0;">
         <h2 style="font-size:1.75rem;margin-bottom:12px;">지금 브랜드를 진단해보세요</h2>
-        <p style="color:var(--text-muted);margin-bottom:24px;">Claude API Key만 있으면 무료로 분석할 수 있습니다</p>
+        <p style="color:var(--text-muted);margin-bottom:24px;">Anthropic Claude API Key만 있으면 별도 소프트웨어 없이 바로 분석할 수 있습니다</p>
         <a href="diagnose.html" class="btn btn--primary btn--lg">🔍 지금 진단하기 →</a>
       </section>
 
@@ -930,22 +1021,21 @@
   </footer>
 
   <script>
-    // 아코디언 토글
+    // 아코디언 토글 (멀티-오픈 방식)
     function toggleAccordion(index) {
       const item = document.getElementById('pillar-' + index);
       const body = document.getElementById('body-' + index);
       const isOpen = item.classList.contains('is-open');
 
-      // 모두 닫기
-      for (let i = 0; i < 7; i++) {
-        const el = document.getElementById('pillar-' + i);
-        const b = document.getElementById('body-' + i);
-        if (el) el.classList.remove('is-open');
-        if (b) b.style.height = '0';
-      }
-
-      // 현재 항목 열기
-      if (!isOpen) {
+      if (isOpen) {
+        // 현재 열린 항목 닫기
+        item.classList.remove('is-open');
+        body.style.height = body.scrollHeight + 'px';
+        // 강제 reflow
+        body.getBoundingClientRect();
+        body.style.height = '0';
+      } else {
+        // 현재 항목 열기
         item.classList.add('is-open');
         body.style.height = body.scrollHeight + 'px';
         body.addEventListener('transitionend', function handler() {
